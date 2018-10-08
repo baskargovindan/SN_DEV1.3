@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element label="ADManagerHSKey" max_length="40" name="x_manen_admanager_admanagerhskey" type="collection">
+        <element label="Generated DateTime" mandatory="true" max_length="40" name="generated_datetime" type="string" unique="true"/>
+        <element label="HSKey" mandatory="true" max_length="40" name="hskey" type="string" unique="true"/>
+        <index name="index">
+            <element name="hskey"/>
+        </index>
+        <index name="index2">
+            <element name="generated_datetime"/>
+        </index>
+    </element>
+</database>

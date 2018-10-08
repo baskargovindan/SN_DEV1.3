@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_manen_admanager.ADManagerActionHandler</api_name>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>ADManagerActionHandler</name>
+        <script><![CDATA[/*
+ * ADManager Actions Handler
+ */
+var ADManagerActionHandler = Class.create();
+ADManagerActionHandler.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+	addActionList:function(domainsVsActionList)
+	{
+		this.removeList(); // To remove all previous entries;
+		var id = 0; // Action Unique Id;
+		for(var domainName in domainsVsActionList){
+			var domain_id = new ADManagerDomainListHandler().getDomainId(domainName); // get domain id for domain name
+			var actionList = new global.JSON().decode(domainsVsActionList[domainName]);
+			//var actionList = domainsVsActionList[domainName];
+			for(var i=0; i<actionList.length;i++)
+			{
+				
+				var action_id = actionList[i].toString();
+				var actionRecord = new GlideRecord('x_manen_admanager_admanageractionslist');
+				actionRecord.initialize(); 
+				actionRecord.unique_id = ++id;
+				actionRecord.domain_id = domain_id; 
+				actionRecord.action_id = action_id; 
+				actionRecord.insert();
+			}
+		}
+		var authDetails = this.getAuthDetails();
+		if(new ADManagerServerDetails().isEnabled())
+		{
+			this.toggleModuleVisibility(authDetails.availableModules, true);
+			this.toggleFormActionVisibility( authDetails.availableFormActions, true);
+		}
+		if(new ADManagerServerDetails().isCatalogItemEnabled())
+		{
+			this.toggleCatalogItemVisibility(authDetails.availableCatalogItems, true);
+		}
+	},
+
+	removeList: function()
+	{
+		var gr = new GlideRecord('x_manen_admanager_admanageractionslist');
+		gr.deleteMultiple();//Delete all records
+		
+		this.disableAllMenusAndActions();
+		var catalogItemList = 'Create User, Delete User, Disable User, Enable User, Reset Password, Unlock User, Add to Group, Remove from Group, Set Folder Permissions, Remove Folder Permissions';
+		this.toggleCatalogItemVisibility(catalogItemList, false);
+	},
+	updateADManagerState: function(state)
+	{
+		var authDetails = this.getAuthDetails();
+		this.disableAllMenusAndActions();
+		this.toggleModuleVisibility(authDetails.availableModules, state);
+		this.toggleFormActionVisibility( authDetails.availableFormActions, state);
+	},
+
+	disableAllMenusAndActions: function()
+	{
+		var actionList = 'Create AD User, Delete AD User, Disable AD User, Enable AD User, Reset AD password, Unlock AD User, Add to Group, Remove from Group, Set Folder Permissions, Remove Folder Permissions';
+		var moduleList = 'Create User, Delete User, Disable User, Enable User, Reset Password, Unlock User, User Management, Add to Group, Remove from Group, Set Folder Permissions, Remove Folder Permissions';
+		this.toggleModuleVisibility(moduleList, false);
+		this.toggleFormActionVisibility(actionList, false);
+	},
+	
+	toggleModuleVisibility: function(moduleList, state)
+	{
+		// To activate/deactivate  ADManager menu modules,
+		var moduleRecord = new GlideRecord('sys_app_module');
+		moduleRecord.addQuery('title', 'IN', moduleList);
+		moduleRecord.query();
+		while(moduleRecord.next())
+		{
+			moduleRecord.active = state;
+			moduleRecord.update(); // update record
+		}
+	},
+	
+	toggleFormActionVisibility: function(actionList, state)
+	{
+		// To activate/deactivate  ADManager context menu actions
+
+		var actionRecord = new GlideRecord('sys_ui_action');
+		actionRecord.addQuery('name', 'IN', actionList);
+		actionRecord.query();
+		while(actionRecord.next())
+		{
+			actionRecord.active = state;
+			actionRecord.update(); // update record
+		}
+	},
+	
+	toggleCatalogItemVisibility: function(cataItemList, state)
+	{
+		// To activate/deactivate  ADManager catalog items
+		var catalogRecord = new GlideRecord('sc_cat_item');
+		catalogRecord.addQuery('name', 'IN', cataItemList);
+		catalogRecord.query();
+		while(catalogRecord.next())
+		{
+			catalogRecord.active = state;
+			catalogRecord.update(); // update record
+		}
+	},
+	
+	getAuthDetails: function()
+	{
+		var authDetails = {};
+		var moduleList = [];
+		var actionList = [];
+		var serviceCatItemList = [];
+		if(this.isAuthorized(1002))
+		{
+			moduleList.push('Create User');
+			actionList.push('Create AD User');
+			serviceCatItemList.push('Create User');
+		}
+		if(this.isAuthorized(1012))
+		{
+			moduleList.push('Reset Password');
+			actionList.push('Reset AD password');
+			serviceCatItemList.push('Reset Password');
+		}
+		if(this.isAuthorized(1015))
+		{
+			moduleList.push('Unlock User');
+			actionList.push('Unlock AD User');
+			serviceCatItemList.push('Unlock User');
+		}
+		if(this.isAuthorized(1019))
+		{
+			moduleList.push('Add to Group');
+			moduleList.push('Remove from Group');
+			
+			actionList.push('Add to Group');
+			actionList.push('Remove from Group');
+			
+			serviceCatItemList.push('Add to Group');
+			serviceCatItemList.push('Remove from Group');
+		}
+		if(this.isAuthorized(1046))
+		{
+			moduleList.push('Delete User');
+			actionList.push('Delete AD User');
+			serviceCatItemList.push('Delete User');
+		}
+		if(this.isAuthorized(1208))
+		{
+			moduleList.push('Disable User');
+			moduleList.push('Enable User');
+			actionList.push('Disable AD User');
+			actionList.push('Enable AD User');
+			serviceCatItemList.push('Disable User');
+			serviceCatItemList.push('Enable User');
+		}
+		if(this.isAuthorized(1909))
+		{
+			moduleList.push('Set Folder Permissions');
+			actionList.push('Set Folder Permissions');
+			serviceCatItemList.push('Set Folder Permissions');
+		}
+		if(this.isAuthorized(1910))
+		{
+			moduleList.push('Remove Folder Permissions');
+			actionList.push('Remove Folder Permissions');
+			serviceCatItemList.push('Remove Folder Permissions');
+		}
+		if(moduleList.length >0)
+			moduleList.push('User Management');
+		
+		authDetails.availableModules =  moduleList.join();
+		authDetails.availableFormActions =  actionList.join();
+		authDetails.availableCatalogItems = serviceCatItemList.join();
+		return authDetails;
+	},
+	isAuthorized: function(action_id)
+	{
+		var actionRecord = new GlideRecord('x_manen_admanager_admanageractionslist');
+		actionRecord.addQuery('action_id', action_id);
+		actionRecord.query();
+		if(actionRecord.getRowCount()>0)
+			return true;
+		else
+			return false;
+	},
+	getDomainIdforAction: function(action_id)
+	{
+		var domainIdList = [];
+		var actionRecord = new GlideRecord('x_manen_admanager_admanageractionslist');
+		actionRecord.addQuery('action_id', action_id);
+		actionRecord.query();
+		while(actionRecord.next())
+		{
+			var domain_id = actionRecord.domain_id;	
+			domainIdList.push(domain_id.toString());
+		}
+		return domainIdList;
+	},
+	type: 'ADManagerActionHandler'
+});
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-04-28 09:48:23</sys_created_on>
+        <sys_id>bf858d9bdbde7600360eda11cf9619ae</sys_id>
+        <sys_mod_count>26</sys_mod_count>
+        <sys_name>ADManagerActionHandler</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_script_include_bf858d9bdbde7600360eda11cf9619ae</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-03-06 13:43:33</sys_updated_on>
+    </sys_script_include>
+</record_update>

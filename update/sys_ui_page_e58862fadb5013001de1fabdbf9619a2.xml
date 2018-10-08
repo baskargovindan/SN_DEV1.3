@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script><![CDATA[var range= 20;
+var selectedFolders = [];
+var resultArray = [];
+var folderPath = '';
+var folderName = '';
+var searchText = '';
+function onLoadFunction()
+{
+	getFolderList(1);
+	resultArray = GlideDialogWindow.get().getPreference('selectedFolders');
+	selectedFolders = resultArray.concat();
+}
+function getFolderList(startIndex)
+{
+	$j('#searchText').prop('disabled', true);
+	if(startIndex == 0)
+		startIndex = $j('#folder_start_index').html(); 
+	if(startIndex == 0)
+		startIndex= 1;
+	$j('#loadingIcon').show();
+	$j('#FolderListTable').hide();
+	$j('#FolderListTableHeader').hide();
+	$j('#errorMsg').hide();
+	
+	searchText = searchText.replace(/\\/g, '\\\\');
+	
+	var folderListAjax = new GlideAjax("ADManagerFileServerHandler");
+	folderListAjax.addParam("sysparm_name","getFolderList");
+	folderListAjax.addParam("searchText",searchText);
+	folderListAjax.addParam("folderPath",folderPath);
+	folderListAjax.addParam("startIndex",startIndex.toString());
+	folderListAjax.addParam("range",range.toString());
+	folderListAjax.getXMLAnswer(folderListResponse);
+
+	function folderListResponse(folderList) 
+	{
+		var result = folderList.evalJSON(); 
+		if(result.status == 'true')
+		{
+			loadfolderList(folderList, false);
+		}
+		else
+		{
+			$j('#loadingIcon').hide();
+			$j('#errorMsg').show();
+			$j('#errorMsg').html("<h5 style=\"text-align: center;margin-top:50px;\">"+result.responseBody+"</h5>");
+		}
+		$j('#searchText').prop('disabled', false);
+	}
+}
+function loadfolderList(folderListJSON, selectAll)
+{
+	folderListJSON = folderListJSON.evalJSON(); 
+	$j('#folder_start_index').html(folderListJSON.startIndex);
+	$j('#folder_end_index').html(folderListJSON.endIndex);
+	$j('#folder_total_count').html(folderListJSON.count);
+	var foldersList = folderListJSON.folderList;
+
+	var html = '';
+	if(foldersList.length > 0)
+	{
+		for(var i=0; i<foldersList.length; i++)
+		{
+
+			var folderName = foldersList[i].FOLDER_NAME?foldersList[i].FOLDER_NAME:'-';
+			var path = foldersList[i].FOLDER_PATH?foldersList[i].FOLDER_PATH:'-';
+			var folderType = foldersList[i].FOLDER_TYPE?foldersList[i].FOLDER_TYPE:'-';
+			var isChecked = (selectAll || isAlreadySelected(path))?'checked' : '';
+			
+			if(folderType == 'FILE')
+				continue;
+			if(i%2==1)
+				html = html+'<tr class="list_row list_odd">';
+			else
+				html = html+'<tr class="list_row list_even">';
+			var cssClass = 'radio';
+			if(folderPath != "")
+			{
+				html = html+'<td class="list_decoration_cell col-control col-small col-center " rowspan="1" scope="row"  style="white-space:nowrap;" id="checkBox"><span class="input-group-radio" style="height: 32px;"><input id="selectfolder_'+encodeURI(folderName)+'" name="selectfolder"  type="radio" class="cat_item_option radio sc-radio" data-path = "'+encodeURI(path)+'" value="'+encodeURI(folderName)+'" '+isChecked+'><label for="selectfolder_'+encodeURI(folderName)+'" class="radio-label" style="height: 32px;"></label></span></td>';
+			}
+			html = html+'<td class="vt vt-spacer" style="cursor:pointer; height: 40px;padding: 0" id="'+encodeURI(path)+'" onclick="expandContainer(this)">';
+
+			if(folderPath == "")	
+			{
+				html += '<img src="ADManager_server.png" width="13" height="13" style= "margin-left: 25px; margin-right:  5px;"/>';
+			}
+			else
+			{
+				html += '<img src="Shared_Folder.png" width="16" height="16" style= "margin-left: 25px; margin-right:  5px;"/> ';
+			}
+			html += folderName+'</td><td class="vt vt-spacer" style="padding: 0" id="folderName">'+path+'</td></tr>'; 
+		}
+	}
+	if(html == '')
+	{
+		$j('#folder_start_index').html(0);
+		html = html+'<tr class="list2_no_records"><td colspan="99">No records to display</td></tr>';
+	}
+	if(folderPath != "")
+	{
+		var folderPathHtml = '<img src="ADManager_server.png" width="13" height="13" onclick="gotoHome()" style= "cursor:pointer; margin:5px;margin-left:10px;"/>';
+		var escapedFolderPath = folderPath;
+		var folderIndex2 = -1;
+		var folderIndex3 = -1;
+		
+		var folderIndex1 = escapedFolderPath.lastIndexOf("\\");
+		if(folderIndex1 > 1)
+			folderIndex2 = escapedFolderPath.lastIndexOf("\\", folderIndex1-1);
+		if(folderIndex2 > 1)
+			folderIndex3 = escapedFolderPath.lastIndexOf("\\", folderIndex2-1);
+		
+		if(folderIndex3 != -1)
+		{
+			folderPathHtml += '<img src="arrow-side.png" width="4" height="7"/><img src="arrow-side.png" width="4" height="7"/><img src="arrow-side.png" width="4" height="7"/><span style= "margin:5px; cursor:pointer;" path="'+escapedFolderPath.slice(0,folderIndex2)+'" onclick="loadFolderLevel(this)">'+escapedFolderPath.slice(folderIndex3+1,folderIndex2)+'</span>';
+		
+		}
+		if(folderIndex2 != -1)
+		{
+			folderPathHtml += '<img src="arrow-side.png" width="4" height="7"/><img src="arrow-side.png" width="4" height="7"/><span style= "margin:5px; cursor:pointer;" path="'+escapedFolderPath.slice(0,folderIndex1)+'"  onclick="loadFolderLevel(this)">'+escapedFolderPath.slice(folderIndex2+1,folderIndex1)+'</span>';
+		}
+		if(folderIndex1 != -1)
+		{
+			folderPathHtml += '<img src="arrow-side.png" width="4" height="7"/><span style= "margin:5px; margin-left:10px;">'+escapedFolderPath.slice(folderIndex1+1)+'</span>';
+		}
+
+		$j("#currentFolderPath").html(folderPathHtml);
+		$j("#currentFolderPath").show();
+	}
+	
+	
+	$j("#FolderListBody").html(html);
+	$j('#loadingIcon').hide();
+	$j('#FolderListTable').show();
+	$j('#FolderListTableHeader').show();
+	$j('#checkBoxHeader').width($j('#checkBox').width());
+	$j('#folderNameHeader').width($j('#folderName').width());
+	$j('#ouNameHeader').width($j('#ouName').width());
+
+	
+	$j("#FolderListTable").hover(function(){$j("#currentFolderPath").fadeIn(300);}, function() {$j("#currentFolderPath").fadeOut(300);});
+	
+	
+	if(true) // Now its single folder selection, 
+	{
+		$j("#checkBoxHeader").html('');
+		$j('[name=selectfolder]').change(function(){  //"select all" change 
+			addfolder(this);
+		});
+	}
+	else
+	{
+		$j("#selectAllFolders").change(function(){  //"select all" change 
+			var status = this.checked; // "select all" checked status
+			$j('[name=selectfolder]').each(function() { //iterate all listed checkbox items
+				this.checked = status; //change ".checkbox" checked status
+				if(status)
+					addfolder(this);
+				else
+					removefolder(this);
+			});
+		});
+
+		$j('[name=selectfolder]').change(function(){ //".checkbox" change 
+			//uncheck "select all", if one of the listed checkbox item is unchecked
+			if(this.checked == false){ //if this item is unchecked
+				$j("#selectAllFolders")[0].checked = false; //change "select all" checked status to false
+				removefolder(this);
+			}
+			else
+				addfolder(this);
+
+			//check "select all" if all checkbox items are checked
+			if ($j('[name=selectfolder]:checked').length == $j('[name=selectfolder]').length ){ 
+				$j("#selectAllFolders")[0].checked = true; //change "select all" checked status to true
+			}
+		});
+		if ($j('[name=selectfolder]:checked').length == $j('[name=selectfolder]').length )
+			$j("#selectAllFolders")[0].checked = true; //change "select all" checked status to true
+		else
+			$j("#selectAllFolders")[0].checked = false; //change "select all" checked status to true
+	}
+
+}
+
+function navigateFirstFolderList()
+{
+	var StartIndex = parseInt($j('#folder_start_index').html());
+	if(StartIndex>20)
+		getFolderList(1);
+}
+function navigateBackFolderList()
+{
+	var total_count = parseInt($j('#folder_total_count').html());
+	var StartIndex = parseInt($j('#folder_start_index').html());
+
+	if(StartIndex-20>=1)
+		getFolderList(StartIndex-20);
+}
+function navigateNextFolderList()
+{
+	var total_count = parseInt($j('#folder_total_count').html());
+	var StartIndex = parseInt($j('#folder_start_index').html());
+
+	if(StartIndex+20<total_count)
+		getFolderList(StartIndex+20);
+}
+function navigateLastFolderList()
+{
+	var total_count = parseInt($j('#folder_total_count').html());
+	var StartIndex = parseInt($j('#folder_start_index').html());
+
+	if(StartIndex+20<total_count)
+	{
+		var startIndex = 1;
+		if(total_count%20 ==0)
+			startIndex = total_count-19;
+		else
+			startIndex = total_count-(total_count%20)+1;
+		getFolderList(startIndex);
+	}
+
+}
+function KeyPressEvent(e)
+{
+	if(e.keyCode == 13){
+		searchFolder();
+	}
+}
+function refreshFolderList()
+{	
+	$j('#searchText').val('');
+	searchText = $j('#searchText').val();
+	selectedFolders = [];
+	getFolderList(1);
+}
+function searchFolder()
+{
+	searchText = $j('#searchText').val();
+	getFolderList(1);
+}
+function updateFoldersList()
+{
+	resultArray.splice(0, resultArray.length);
+	for(var i=0; i<selectedFolders.length; i++)
+	{
+		resultArray.push(selectedFolders[i]);
+	}
+	resultArray.sort(function( a , b ){return a.folderName.localeCompare(b.folderName);});
+	updateFolderForm();
+	GlideDialogWindow.get().destroy();
+}
+function addfolder(element)
+{
+	var folderDetails = {};
+	var folderName = decodeURI($j(element).val());
+	var folderPath = decodeURI($j(element).data('path'));
+	if(true) //Now single folder at a time
+	{
+		selectedFolders.splice(0, 1);
+		folderDetails.folderName = folderName;
+		folderDetails.folderPath = folderPath;
+	}
+	else
+	{
+		if(isAlreadySelected(folderName))
+			return;
+		folderDetails.folderName = folderName;
+		folderDetails.folderPath = folderPath;
+	}
+	selectedFolders.push(folderDetails);
+	selectedFolders.sort();
+}
+function removefolder(element)
+{
+	for(var i=0; i<selectedFolders.length; i++)
+	{
+		if(selectedFolders[i].folderName == decodeURI($j(element).data('name')))
+			selectedFolders.splice(i, 1);
+	}
+}
+function isAlreadySelected(folderPath)
+{
+	for(var i=0; i<selectedFolders.length; i++)
+	{
+		if(selectedFolders[i].folderPath == folderPath)
+			return true;
+	}
+	return false;
+}
+function expandContainer(element)
+{
+	$j('#searchText').val('');
+	searchText = $j('#searchText').val();
+	folderPath = decodeURI(element.id);
+	getFolderList(1);
+}
+function gotoHome()
+{
+	folderPath = "";
+	$j('#searchText').val('');
+	searchText = $j('#searchText').val();
+	getFolderList(1);
+	$j("#currentFolderPath").hide();
+}
+function loadFolderLevel(element)
+{
+	folderPath = $j(element).attr('path');
+	getFolderList(1);
+}]]></client_script>
+        <description>ADManager Folder List</description>
+        <direct>false</direct>
+        <endpoint>x_manen_admanager_ADManager Folder List.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+
+	<script>
+		addLoadEvent( function() {onLoadFunction();});
+	</script>
+	<style>
+		.glowing-border {
+		border: 1px solid #BDC0C4;
+		border-radius: 4px;
+		}
+
+		.glowing-border:focus { 
+		outline: none;
+		border-color: #9ecaed;
+		box-shadow: 0 0 10px #9ecaed;
+		}
+		.scroll
+		{
+		overflow:scroll;
+		height:100px;
+		width:100%;
+		overflow-x: hidden;
+		}
+	</style>
+	<div style="display: block; width: 100%; height=100%; background:#E6E8EA">
+
+		<input onkeypress="return KeyPressEvent(event)" type="text" class="glowing-border" value="" maxlength="" name="searchText" id="searchText" style="margin-left: 10px; margin-top: 5px" />
+
+		<button onclick="searchFolder();" class="list_header_search_toggle icon-search btn btn-icon table-btn-lg" style="margin-left:5px;margin-top: 3px"><span class="sr-only">Search</span></button> 
+		<button onclick="refreshFolderList();" class="list_header_search_toggle icon-refresh btn btn-icon table-btn-lg" style="margin-left:2px;margin-top: 3px"><span class="sr-only">Refresh</span></button> 
+		<div class="nav navbar-right text-align-right" id="nav_elements">
+			<button name="vcr_first" data-nav="true" title="" id="nav_first" class="list_nav  btn btn-icon h_flip_content tab_button_disabled" data-original-title="First page" style="right: 0px; z-index: 10;" onClick="navigateFirstFolderList();"><span class="sr-only">First page</span><span class="icon-vcr-left"></span><span class="icon-vcr-left"></span></button>
+			<button name="vcr_back" data-nav="true" title="" id="nav_back" class="list_nav  btn btn-icon h_flip_content tab_button_disabled" data-original-title="Previous page" onClick="navigateBackFolderList();"><span class="sr-only">Previous page</span><span class="icon-vcr-left"></span></button>
+
+			<span style="margin-left: 5px;" class=" list_row_number_input ">
+				<span style="margin-left: 1px; margin-right: 1px" id="folder_start_index">0</span>
+				to
+				<span style="margin-left: 1px; margin-right: 1px" id="folder_end_index">0</span>
+				of
+				<span style="margin-left: 1px;" id="folder_total_count">0</span></span>
+
+
+			<button name="vcr_next" data-nav="true" title="" id="nav_next" class="list_nav  btn btn-icon h_flip_content tab_button_disabled" data-original-title="Next page"  onClick="navigateNextFolderList();"><span class="sr-only">Next page</span><span class="icon-vcr-right"></span></button>
+			<button name="vcr_last" data-nav="true" title="" id="nav_last" class="list_nav  btn btn-icon h_flip_content tab_button_disabled" data-original-title="Last page"  onClick="navigateLastFolderList();"><span class="sr-only">Last page</span><span class="icon-vcr-right"></span><span class="icon-vcr-right"></span></button>
+
+		</div>
+
+	</div>
+	<!-- <div>
+  <table style="width: 100%; height:40px; margin-bottom: 0px; outline: none; display:none;" class="scroll data_list_table list_table table table-hover" >
+
+  </table>
+ </div> -->
+	<div style="height:380px" id="loadingIcon">
+		<button class="list_header_search_toggle icon-loading btn btn-icon table-btn-lg" style="margin-top:25%;margin-left:50%;"></button>
+	</div>
+	<div style="display:none; height:380px;" id="errorMsg"> 
+	</div>
+	<div>
+		<table style="width: 100%; height:40px; margin-bottom: 0px; outline: none; display:none;" class="scroll data_list_table list_table table table-hover" id="FolderListTableHeader">
+			<thead>
+				<tr>
+					<th class="list_decoration_cell col-control col-small col-center " rowspan="1" scope="row"  style="white-space:nowrap;" id="checkBoxHeader"><span class="input-folder-checkbox"><input name="check_all_adfolder" id="selectAllFolders" data-type="list2_checkbox" type="checkbox" class="checkbox"  value = ""/><label for="selectAllFolders" class="checkbox-label" style=""></label></span></th>
+					
+					<th style="vertical-align:middle; white-space:nowrap" align="center" class=" col-control" scope="col" id="folderNameHeader"><span> Name</span></th>
+					<th style="vertical-align:middle; white-space:nowrap" align="center" class=" col-control" scope="col" id="ouNameHeader"><span> Path</span></th>
+				</tr>
+			</thead>
+		</table>
+	</div>
+	<div style="height:380px;display:none;" class="scroll" id="FolderListTable">
+		<table  class="data_list_table list_table table table-hover">
+			<tbody class="list2_body" tabindex="0" id = "FolderListBody">
+			</tbody>
+		</table>
+		<div style="position:absolute; z-index:9999; bottom:9%; left:2%; margin:5px; margin-left:0px; box-shadow:0 0 5px 0;background-color:#E8FAE6;display:none; border-radius: 3px;" id="currentFolderPath">
+		</div>
+	</div>
+	<div  style= "margin-top:10px; position:relative;top:50%;left:45%;" id="folderSubmitButton">
+		<button style = "width=500px;" href="#" type="button" onclick="updateFoldersList()" name="ok_button" id="ok_button" title="" class="header_button btn cat-btn btn-primary" aria-label="OK" data-original-title="Ok">     OK    </button>
+	</div>
+</j:jelly>]]></html>
+        <name>ADManager Folder List</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-02-19 10:01:12</sys_created_on>
+        <sys_id>e58862fadb5013001de1fabdbf9619a2</sys_id>
+        <sys_mod_count>81</sys_mod_count>
+        <sys_name>ADManager Folder List</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_ui_page_e58862fadb5013001de1fabdbf9619a2</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-03-21 10:09:43</sys_updated_on>
+    </sys_ui_page>
+</record_update>

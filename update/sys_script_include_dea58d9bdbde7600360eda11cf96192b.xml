@@ -1,0 +1,614 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_manen_admanager.ADManagerAPIUtil</api_name>
+        <client_callable>true</client_callable>
+        <description>ADManager APIUtil</description>
+        <name>ADManagerAPIUtil</name>
+        <script><![CDATA[/*
+* ADManagerAPIUtil
+*/
+
+var ADManagerAPIUtil = Class.create();
+ADManagerAPIUtil.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+	// GetAuthToken & GetDomainList call
+	// These API calls will be seperated in next release 
+	/*
+	 *Params 
+	 *       GetDomainList : methodToCall, MIDServer, useMIDServer, username, password, domainname;
+	 *       GetAuthTicket : methodToCall, server_name, server_port, protocol_settings, MIDServer, useMIDServer;
+	 */
+
+	mobileLogin: function(){
+		var requestBody, responseBody, responseCode, sm;
+		var responseJSON;
+		var methodToCall = this.getParameter('methodToCall');
+		var url = new ADManagerServerDetails().getURL(); // If Server is already configured.
+		if(this.getParameter('server_name') && this.getParameter('server_port'))
+			url = this.getParameter('protocol_settings')+'://'+this.getParameter('server_name')+':'+this.getParameter('server_port');
+
+		//update MID server
+		new ADManagerMIDServerHandler().setMIDServerToRestMessages(this.getParameter('MIDServer')); // Update MID server in all ADManager rest messages 
+		new ADManagerServerDetails().updateMIDServer(this.getParameter('useMIDServer'), this.getParameter('MIDServer')); // Update MIDserver name in serversetails table/
+		try{
+
+			if(methodToCall == 'getAuthTicket') // ADManger Login call
+			{
+				if(this.getParameter('username') == '' && this.getParameter('pwd') == '') // This will logout the current logged in user by removing auth. 
+				{
+					new ADManagerAuthHandler().removeAuth();
+					new ADManagerActionHandler().removeList();
+					new ADManagerServerDetails().updateLoginCredentials(this.getParameter('username'), '', this.getParameter('domainName'));	
+					return new global.JSON().encode(responseJSON);
+				}
+				sm = new sn_ws.RESTMessageV2("ADManagerGetAuthToken", "post");  // Might throw exception if message doesn't exist or not visible due to scope.       
+				sm.setStringParameter('loginName', this.getParameter('username'));  
+				sm.setStringParameterNoEscape('password', this.getParameter('pwd'));  
+				sm.setStringParameter('domainName', this.getParameter('domainName')); 
+			}
+			else if(methodToCall == 'domainList') // ADMAnager get domain list call
+			{
+				sm = new sn_ws.RESTMessageV2("ADManagerGetDomainList", "post");  // Might throw exception if message doesn't exist or not visible due to scope.	
+			}
+			sm.setStringParameter('methodToCall', methodToCall);  
+			sm.setStringParameter('url', url);
+			sm.setHttpTimeout(10000); //In milliseconds. Wait at most 10 seconds for response from http request.
+
+			var response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		// ADManaer Error handler will check the response & throw proper error.
+		responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+		if(methodToCall == 'domainList')
+		{
+			if(responseJSON.status == 'true')
+			{
+				new ADManagerDomainListMgmtHandler().insertLoginDomainList(responseJSON.responseBody); // Update received domain list in ADManger domainList
+				new ADManagerServerDetails().insertEntry(this.getParameter('protocol_settings'), this.getParameter('server_name'), this.getParameter('server_port'), this.getParameter('is_enabled'),  this.getParameter('enable_service_catalog_item'), this.getParameter('useMIDServer'), this.getParameter('MIDServer'));  // update server details in serverdetails table
+				this.updateADMPVersionNumber(url);
+				new ADManagerAuthHandler().removeAuth(); // To initiate ADManager login, auth removed.
+				new ADManagerActionHandler().removeList();//Actions removed
+				gs.addInfoMessage('Connected Successfully');
+			}
+			else
+			{
+				gs.addErrorMessage('Cannot connect to ADManager Plus. Possible reasons could be no network connection, wrong server name or port number, or MID server being down.');
+			}
+		}
+		else if(methodToCall == 'getAuthTicket')
+		{
+			if(responseJSON.status == 'true')
+			{
+				new ADManagerAuthHandler().handleResponse(responseJSON.responseBody); // Update/ Store Authtoken & Auth Details in AuthObject table
+				new ADManagerServerDetails().updateLoginCredentials(this.getParameter('username'), '', this.getParameter('domainName')); // Update User provided loginname & domain name in server details table.
+			}else
+			{
+				//TODO
+			}
+		}
+		return new global.JSON().encode(responseJSON);
+	},
+	/* fetch all template list from ADManager
+	 * Params : -
+	 */
+	getTemplateList: function(action_id)
+	{
+		var responseJSON = {};
+		var requestBody, responseBody, responseCode, sm;
+
+		//Script Includes
+		var domainHandler = new ADManagerDomainListHandler();
+		var authHandler = new ADManagerAuthHandler();
+		var templateHandler = new ADManagerTemplateMgmtHandler();
+		var serverHandler = new ADManagerServerDetails();
+
+		var authToken = authHandler.getAuthToken();
+		if(authToken == '') // If AuthToken not present in DB.
+		{
+			responseJSON.responseBody = 'ADManager is not yet authenticated. Please login with valid credentials.';
+			responseJSON.status = 'false';
+			return new global.JSON().encode(responseJSON);
+		}
+		var url = serverHandler.getURL();	
+		var domainList =  new global.JSON().decode(domainHandler.getDomainList(action_id));
+		templateHandler.removeTemplates(); // To remove all previous templates
+		// Tempate list api called again & again for each domain. This may take more time, if number of domains is high. This will be fixed in next release.
+		for(var i= 0; i<domainList.length;i++) 
+		{
+			var domainName = domainList[i].domainName;
+			var domainId = domainList[i].domainId;
+			try{
+				sm = new sn_ws.RESTMessageV2("ADManagerTemplateNames", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+				sm.setStringParameter('AuthToken', authToken);  
+				sm.setStringParameter('url', url);
+				sm.setStringParameter('domainName', domainName);
+				sm.setHttpTimeout(10000); //In milliseconds. Wait at most 10 seconds for response from http request.
+				response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+
+				responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+				responseCode = response.getStatusCode();
+			} catch(ex) {
+				responseBody = ex.getMessage();
+				responseCode = '500';
+			} finally {
+				requestBody = sm ? sm.getRequestBody():null;
+			}
+
+			// ADManaer Error handler will check the response & throw proper error.
+			responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+			if(responseJSON.status == 'true')
+			{
+				var response =  new global.JSON().decode(responseJSON.responseBody);
+				// Store received templates in DB.
+				templateHandler.addTemplateList(response.TemplateList, domainId); 
+			}
+			else
+			{
+				gs.addInfoMessage('Unable to fetch the Template List from ADManager Plus');
+			}
+		}
+		// Send default domain name to client script.
+		responseJSON.DomainName = domainHandler.getDefaultDomain().toString();
+
+		return new global.JSON().encode(responseJSON);
+	},
+
+	/* Create a new user in AD
+	 * Params : userDetails JSON, domainName
+	 */
+	createSingleUser: function()
+	{
+		var requestBody, responseBody, responseCode, sm;
+		var responseJSON = {};
+
+		//Script Includes
+		var authHandler = new ADManagerAuthHandler();
+		var serverHandler = new ADManagerServerDetails();
+
+		// To get domainName & AuthToken
+		var authToken = authHandler.getAuthToken();
+		if(authToken == '') // If Authtoken not present in DB.
+		{ 
+			responseJSON.status = 'false';
+			return new global.JSON().encode(responseJSON);
+		}
+		var url = serverHandler.getURL();	
+		var userDetails = this.getParameter('userDetails');
+
+		// To set TemplateName with template display name.
+		// To set TemplateName with template display name.
+		userDetails = new global.JSON().decode(userDetails);
+		userDetails[0].templateName = new ADManagerTemplateHandler().getTemplateName(userDetails[0].templateName);
+		userDetails = new global.JSON().encode(userDetails);
+
+		var domainName =  this.getParameter('domainName');
+		try{
+			sm = new sn_ws.RESTMessageV2("ADManagerCreateUser", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+			sm.setStringParameter('AuthToken', authToken);  
+			sm.setStringParameter('url', url);
+			sm.setStringParameter('domainName', domainName);
+			sm.setStringParameter('HANDSHAKE_KEY', this.getHandshakeKey());
+			sm.setStringParameterNoEscape('inputFormat', userDetails);// setStringParameterNoEscape for JSON String
+			sm.setHttpTimeout(10000); //In milliseconds. Wait at most 10 seconds for response from http request.
+			response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+
+		return new global.JSON().encode(responseJSON); // JSON Object --> JSON String;
+	},
+	/* Fetch ADUSer List from ADManager
+	 * Params : domainName, searchText, startIndex, range;
+	 */
+	getADUsersList: function(domainName, searchText, startIndex, range)
+	{
+		var requestBody, responseBody, responseCode, sm;
+		var responseJSON = {};
+
+		var authHandler = new ADManagerAuthHandler();
+		var serverHandler = new ADManagerServerDetails();
+
+		var authToken = authHandler.getAuthToken();
+		if(authToken == '')// If Authtoken not present in DB.
+		{
+			responseJSON.responseBody = 'ADManager is not yet authenticated. Please login with valid credentials.';
+			responseJSON.status = 'false';
+			return new global.JSON().encode(responseJSON);
+		}
+		var url = serverHandler.getURL();	
+		try{
+			sm = new sn_ws.RESTMessageV2("ADManagerADUserList", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+			sm.setStringParameter('authToken', authToken);  
+			sm.setStringParameter('url', url);
+			sm.setStringParameter('domainName', domainName);
+			sm.setStringParameterNoEscape('searchText', searchText);
+			sm.setStringParameter('fromIndex', startIndex);
+			sm.setStringParameter('range', range);
+			sm.setHttpTimeout(10000); //In milliseconds. Wait at most 10 seconds for response from http request.
+			response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+		return new global.JSON().encode(responseJSON); // JSON Object --> JSON String;
+	},
+	/* Enable a AD User.
+	 * Params : domainName, inputFormat;
+	 */
+	enableUser: function()
+	{		
+		var requestBody, responseBody, responseCode, sm;
+		var responseJSON = {};
+
+		var authHandler = new ADManagerAuthHandler();
+		var serverHandler = new ADManagerServerDetails();
+
+		var authToken = authHandler.getAuthToken();
+		var url = serverHandler.getURL();	
+
+		var domainName = this.getParameter('domainName');
+		var inputFormat = this.getParameter('inputFormat');
+		try{
+			sm = new sn_ws.RESTMessageV2("ADManagerEnableUser", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+			sm.setStringParameter('authToken', authToken);  
+			sm.setStringParameter('url', url);
+			sm.setStringParameter('domainName', domainName);
+			sm.setStringParameterNoEscape('inputFormat', inputFormat);
+			sm.setStringParameter('HANDSHAKE_KEY', this.getHandshakeKey());
+			sm.setHttpTimeout(10000); //In milliseconds. Wait at most 10 seconds for response from http request.
+			response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+		return new global.JSON().encode(responseJSON); // JSON Object --> JSON String;
+	},
+	/* Disable a AD User.
+	 * Params : domainName, inputFormat;
+	 */
+	disableUser: function()
+	{		
+		var requestBody, responseBody, responseCode, sm;
+		var responseJSON = {};
+
+		var authHandler = new ADManagerAuthHandler();
+		var serverHandler = new ADManagerServerDetails();
+
+		var authToken = authHandler.getAuthToken();
+		var url = serverHandler.getURL();	
+
+		var domainName = this.getParameter('domainName');
+		var inputFormat = this.getParameter('inputFormat');
+		try{
+			sm = new sn_ws.RESTMessageV2("ADManagerDisableUser", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+			sm.setStringParameter('authToken', authToken);  
+			sm.setStringParameter('url', url);
+			sm.setStringParameter('domainName', domainName);
+			sm.setStringParameterNoEscape('inputFormat', inputFormat);
+			sm.setStringParameter('HANDSHAKE_KEY', this.getHandshakeKey());
+			sm.setHttpTimeout(10000); //In milliseconds. Wait at most 10 seconds for response from http request.
+			response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+		return new global.JSON().encode(responseJSON); // JSON Object --> JSON String;
+	},
+	/* Unlock a AD User.
+	 * Params : domainName, inputFormat;
+	 */
+	unlockUser: function()
+	{
+		var requestBody, responseBody, responseCode, sm;
+		var responseJSON = {};
+
+		var authHandler = new ADManagerAuthHandler();
+		var serverHandler = new ADManagerServerDetails();
+
+		var authToken = authHandler.getAuthToken();
+		var url = serverHandler.getURL();	
+		var domainName = this.getParameter('domainName');
+		var inputFormat = this.getParameter('inputFormat');
+		try{
+			sm = new sn_ws.RESTMessageV2("ADManagerUnlockUser", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+			sm.setStringParameter('AuthToken', authToken);  
+			sm.setStringParameter('url', url);
+			sm.setStringParameter('domainName', domainName);
+			sm.setStringParameterNoEscape('inputFormat', inputFormat);
+			sm.setStringParameter('HANDSHAKE_KEY', this.getHandshakeKey());
+			sm.setHttpTimeout(10000); //In milliseconds. Wait at most 10 seconds for response from http request.
+			response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+		return new global.JSON().encode(responseJSON); // JSON Object --> JSON String;
+	},
+	/* Delete a AD User.
+	 * Params : domainName, inputFormat;
+	 */
+	deleteUser: function()
+	{
+		var requestBody, responseBody, responseCode, sm;
+		var responseJSON = {};
+
+		var authHandler = new ADManagerAuthHandler();
+		var serverHandler = new ADManagerServerDetails();
+
+		var authToken = authHandler.getAuthToken();
+		var url = serverHandler.getURL();	
+
+		var domainName = this.getParameter('domainName');
+		var inputFormat = this.getParameter('inputFormat');
+		try{
+			sm = new sn_ws.RESTMessageV2("ADManagerDeleteUser", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+			sm.setStringParameter('AuthToken', authToken);  
+			sm.setStringParameter('url', url);
+			sm.setStringParameter('domainName', domainName);
+			sm.setStringParameterNoEscape('inputFormat', inputFormat);
+			sm.setStringParameter('HANDSHAKE_KEY', this.getHandshakeKey());
+			sm.setHttpTimeout(10000); //In milliseconds. Wait at most 10 seconds for response from http request.
+			response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+		return new global.JSON().encode(responseJSON); // JSON Object --> JSON String;
+	},
+	/* Reeset password for a AD User.
+	 * Params : domainName, inputFormat;
+	 */
+	resetPwd: function()
+	{
+		var requestBody, responseBody, responseCode, sm;
+		var responseJSON = {};
+
+		var authHandler = new ADManagerAuthHandler();
+		var serverHandler = new ADManagerServerDetails();
+
+		var authToken = authHandler.getAuthToken();
+		var url = serverHandler.getURL();	
+
+		var domainName = this.getParameter('domainName');
+		var password = this.getParameter('password');
+		var mustChangePassword = this.getParameter('mustChangePassword');
+		var inputFormat = this.getParameter('inputFormat');
+		try{
+			sm = new sn_ws.RESTMessageV2("ADManagerResetPwd", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+			sm.setStringParameter('AuthToken', authToken);  
+			sm.setStringParameter('url', url);
+			sm.setStringParameter('domainName', domainName);
+			sm.setStringParameterNoEscape('pwd', password);
+			sm.setStringParameter('mustChangePassword', mustChangePassword);
+			sm.setStringParameterNoEscape('inputFormat', inputFormat);
+			sm.setStringParameter('HANDSHAKE_KEY', this.getHandshakeKey());
+			sm.setHttpTimeout(10000); //In milliseconds. Wait at most 10 seconds for response from http request.
+			response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+		return new global.JSON().encode(responseJSON); // JSON Object --> JSON String;
+	},
+	addRemoveGroups: function()
+	{
+		var requestBody, responseBody, responseCode, sm;
+		var responseJSON = {};
+
+		var authHandler = new ADManagerAuthHandler();
+		var serverHandler = new ADManagerServerDetails();
+
+		var authToken = authHandler.getAuthToken();
+		var url = serverHandler.getURL();	
+
+		var domainName = this.getParameter('domainName');
+		var inputFormat = this.getParameter('inputFormat');
+		var addGroup = this.getParameter('addGroup');
+		var removeGroup = this.getParameter('removeGroup');
+		//var primaryGroup = this.getParameter('primaryGroup');
+		var objectType = this.getParameter('objectType');
+		var isRemoveFromAllGroup =  this.getParameter('isRemoveFromAllGroup');
+		try{
+			sm = new sn_ws.RESTMessageV2("ADManagerAddRemoveGroups", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+			sm.setStringParameter('AuthToken', authToken);  
+			sm.setStringParameter('url', url);
+			sm.setStringParameter('domainName', domainName);
+			sm.setStringParameter('objectType', objectType);
+			if(addGroup != null)
+			{
+				sm.setStringParameterNoEscape('addGroup', addGroup);
+			}
+			else
+			{
+				sm.setStringParameterNoEscape('addGroup', []);
+			}
+			if(removeGroup != null)
+			{
+				sm.setStringParameterNoEscape('removeGroup', removeGroup);
+				sm.setStringParameter('isRemoveFromAllGroup' , isRemoveFromAllGroup);
+			}
+			else
+			{
+				sm.setStringParameterNoEscape('removeGroup', []);
+				sm.setStringParameter('isRemoveFromAllGroup' , false);
+			}
+			sm.setStringParameter('HANDSHAKE_KEY', this.getHandshakeKey());
+			sm.setStringParameterNoEscape('inputFormat', inputFormat);
+			sm.setHttpTimeout(20000); //In milliseconds. Wait at most 10 seconds for response from http request.
+			var response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+		return new global.JSON().encode(responseJSON); // JSON Object --> JSON String;
+	},
+	getHandshakeKey: function()
+	{
+		return new ADManagerHSKeyAuthenticator().getHSKey(true);
+	},
+	updateADMPVersionNumber: function(url)
+	{
+		try{
+			sm = new sn_ws.RESTMessageV2("ADManagerProductVersion", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+			sm.setStringParameter('url', url);
+			sm.setHttpTimeout(10000); //In milliseconds. Wait at most 10 seconds for response from http request.
+			var response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		var responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+		if(responseJSON.status == 'true')
+		{
+			var productDetails = new global.JSON().decode(responseJSON.responseBody);
+			new ADManagerServerDetails().setProductVersion(productDetails.BUILD_NUMBER);  // update server details in serverdetails table
+		}
+	},
+	setFolderPermissions: function()
+	{
+		var requestBody, responseBody, responseCode, sm;
+		var responseJSON = {};
+		var authHandler = new ADManagerAuthHandler();
+		var serverHandler = new ADManagerServerDetails();
+
+		var authToken = authHandler.getAuthToken();
+		var url = serverHandler.getURL();	
+
+		var domainName = this.getParameter('domainName');
+		var folders = this.getParameter('folders');
+		var PERMISSION_COMPONENT = this.getParameter('PERMISSION_COMPONENT');
+		var actionId = this.getParameter('actionId');
+		var revertDuration = this.getParameter('revertDuration');	
+		try{
+			sm = new sn_ws.RESTMessageV2("ADManagerSetFolderPermissions", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+			sm.setStringParameter('AuthToken', authToken);  
+			sm.setStringParameter('url', url);
+			sm.setStringParameter('domainName', domainName);
+			sm.setStringParameterNoEscape('folders', folders);
+			sm.setStringParameterNoEscape('PERMISSION_COMPONENT', PERMISSION_COMPONENT);
+			if(revertDuration != "Forever")
+				sm.setStringParameterNoEscape('revertDuration', revertDuration);
+			sm.setStringParameter('actionId', actionId);
+			if(actionId != 1){
+				sm.setStringParameter('actionValueId', this.getParameter('actionValueId'));
+				sm.setStringParameter('actionValue', this.getParameter('actionValue'));
+			}
+
+			sm.setStringParameter('HANDSHAKE_KEY', this.getHandshakeKey());
+			sm.setHttpTimeout(30000); //In milliseconds. Wait at most 10 seconds for response from http request.
+			var response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+		return new global.JSON().encode(responseJSON); // JSON Object --> JSON String;
+	},
+	removeFolderPermissions: function()
+	{
+		var requestBody, responseBody, responseCode, sm;
+		var responseJSON = {};
+		var authHandler = new ADManagerAuthHandler();
+		var serverHandler = new ADManagerServerDetails();
+
+		var authToken = authHandler.getAuthToken();
+		var url = serverHandler.getURL();	
+
+		var domainName = this.getParameter('domainName');
+		var folders = this.getParameter('folders');
+		var PERMISSION_COMPONENT = this.getParameter('PERMISSION_COMPONENT');
+		try{
+			sm = new sn_ws.RESTMessageV2("ADManagerRemoveFolderPermissions", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+			sm.setStringParameter('AuthToken', authToken);  
+			sm.setStringParameter('url', url);
+			sm.setStringParameter('domainName', domainName);
+			sm.setStringParameterNoEscape('folders', folders);
+			sm.setStringParameterNoEscape('PERMISSION_COMPONENT', PERMISSION_COMPONENT);
+			sm.setStringParameter('HANDSHAKE_KEY', this.getHandshakeKey());
+			sm.setHttpTimeout(30000); //In milliseconds. Wait at most 30 seconds for response from http request.
+			var response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+		return new global.JSON().encode(responseJSON); // JSON Object --> JSON String;
+	},
+	type: 'ADManagerAPIUtil'
+});
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-04-28 09:49:04</sys_created_on>
+        <sys_id>dea58d9bdbde7600360eda11cf96192b</sys_id>
+        <sys_mod_count>94</sys_mod_count>
+        <sys_name>ADManagerAPIUtil</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_script_include_dea58d9bdbde7600360eda11cf96192b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-03-21 08:29:03</sys_updated_on>
+    </sys_script_include>
+</record_update>

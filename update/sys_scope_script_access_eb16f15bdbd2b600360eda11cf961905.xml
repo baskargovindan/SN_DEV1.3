@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_scope_script_access">
+    <sys_scope_script_access action="INSERT_OR_UPDATE">
+        <example_stack_trace>Default-thread-210
+	com.glide.sys.fencing.dependency.ScopeAccessProvider$ScopeAccessCache.getCurrentStackTrace(ScopeAccessProvider.java:231)
+	com.glide.sys.fencing.dependency.ScopeAccessProvider$ScopeAccessCache.record(ScopeAccessProvider.java:200)
+	com.glide.sys.fencing.dependency.ScopeAccessProvider$ScopeAccessCache.access$100(ScopeAccessProvider.java:80)
+	com.glide.sys.fencing.dependency.ScopeAccessProvider.recordAccess(ScopeAccessProvider.java:63)
+	com.glide.sys.fencing.dependency.ScopeAccessRecorder.record(ScopeAccessRecorder.java:13)
+	com.glide.script.system.ASystemInclude.recordCrossScopeAccess(ASystemInclude.java:123)
+	com.glide.script.system.ASystemInclude.include(ASystemInclude.java:106)
+	com.glide.script.AGlideRhinoScopeHandler.isScriptInclude(AGlideRhinoScopeHandler.java:43)
+	com.glide.script.GlideRhinoScopeHandler.found(GlideRhinoScopeHandler.java:24)
+	com.glide.script.ARhinoScope.get(ARhinoScope.java:75)
+	com.glide.script.RhinoScope.get(RhinoScope.java:51)
+	com.glide.script.PackageRhinoGlobalScope.get(PackageRhinoGlobalScope.java:34)
+	org.mozilla.javascript.ScriptableObject.getProperty(ScriptableObject.java:1478)
+	org.mozilla.javascript.ScriptRuntime.getProp(ScriptRuntime.java:724)
+	org.mozilla.javascript.gen.c9106.call(sys_script_include.c176011fdbde7600360eda11cf961962:34)
+	org.mozilla.javascript.ScriptRuntime.call(ScriptRuntime.java:1227)
+	org.mozilla.javascript.BaseFunction.applyOrCall(BaseFunction.java:490)
+	org.mozilla.javascript.BaseFunction.execMethod(BaseFunction.java:198)
+	org.mozilla.javascript.IdFunction.call(IdFunction.java:78)
+	org.mozilla.javascript.ScriptRuntime.call(ScriptRuntime.java:1227)
+	org.mozilla.javascript.gen.c540.call(sys_script_include.d65f78c40a0a0b6900196656f35913d3:34)
+	org.mozilla.javascript.ScriptRuntime.call(ScriptRuntime.java:1227)
+	org.mozilla.javascript.ScriptableObject.callMethod(ScriptableObject.java:1655)
+	com.glide.script.RhinoObject.callFunction(RhinoObject.java:167)
+	com.glide.script.RhinoObject.callFunction(RhinoObject.java:163)
+	com.glide.processors.xmlhttp.AJAXEvaluator.evalScriptInclude(AJAXEvaluator.java:165)
+	com.glide.processors.xmlhttp.AJAXEvaluator.evaluateAjax(AJAXEvaluator.java:84)
+	com.glide.processors.xmlhttp.AJAXEvaluator.process(AJAXEvaluator.java:62)
+	com.glide.processors.XMLHttpProcessor.processJavaAJAX(XMLHttpProcessor.java:143)
+	com.glide.processors.XMLHttpProcessor.process(XMLHttpProcessor.java:100)
+	com.glide.processors.AProcessor.runProcessor(AProcessor.java:409)
+	com.glide.processors.AProcessor.processTransaction(AProcessor.java:183)
+	com.glide.processors.ProcessorRegistry.process(ProcessorRegistry.java:165)
+	com.glide.ui.GlideServletTransaction.process(GlideServletTransaction.java:32)
+	com.glide.sys.ServletTransaction.run(ServletTransaction.java:34)
+	java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	java.lang.Thread.run(Thread.java:745)
+</example_stack_trace>
+        <script_name>JSON</script_name>
+        <source_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</source_scope>
+        <sys_class_name>sys_scope_script_access</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-04-28 13:20:17</sys_created_on>
+        <sys_id>eb16f15bdbd2b600360eda11cf961905</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>JSON</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_scope_script_access_eb16f15bdbd2b600360eda11cf961905</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-04-28 13:20:17</sys_updated_on>
+        <target_scope display_value="Global">global</target_scope>
+    </sys_scope_script_access>
+</record_update>

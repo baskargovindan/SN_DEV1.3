@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>ADManager SUpport Details</description>
+        <direct>false</direct>
+        <endpoint>x_manen_admanager_ADManger Support.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<div id="contactInformation">
+		<h2> <b>Contact Information </b></h2>
+		<ul style="list-style: none;">
+			<li>Direct Inward Dialing Number: <b>+1-408-916-9393</b></li>
+			<li>Support Email: <a href="mailto:support@admanagerplus.com" target="_blank">support@admanagerplus.com</a></li>
+			<li>Live Online Support: 24 x 5</li>
+			<li><b>Toll Free Numbers </b>:</li>
+			<li>$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]	USA: +1 888 720 9500</li>
+			<li>$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]	UK : 0800 028 6590</li>
+			<li>$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]	AUS : +1 800 631 268</li>
+			<li>$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]	CN : +86 400 660 8680</li>
+			<li>$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]$[SP]	Intl : +1 925 924 9500</li>
+			<!-- <li>Toll Free :1-888-720-9500</li>
+  <li>Direct : +1-408-916-9393</li>
+  <li>Email : support@admanagerplus.com</li> -->
+		</ul>
+	</div>
+	<div id="DebuggingBlock">
+
+		<h2> <b>Debugging and troubleshooting</b></h2>
+		<ul style="list-style: none;">
+			<!-- <li><h4> <b>Debugging tips</b></h4></li> -->
+			<li><span>After the installation of ADManager Plus application on the ServiceNow instance, it is required to provide the following details to connect to the ADManager Plus server:</span></li>
+			<li><ol type="I">
+				<li>Server Name</li>
+				<li>Port Name</li>
+				<li>Protocol to use  - HTTP or HTTPS</li>
+				<li>MID Server configuration</li>
+				</ol></li>
+			<li><span> On entering and submitting these values, the application will connect to ADManager Plus server and would try to obtain an AuthToken. </span></li>
+		</ul>
+		<ol type="1">
+		<li>If you receive any error message stating that a connection could not be established with the ADManager Plus server, please check the following:
+			<ul type="square">
+				<li>In any web browser on the local network, check whether the ADManager Login page appears when the url is entered in the below format: {protocol}://{ServerName}:{PortNumber}</li>
+				<li>If there is any error, then ADManager Plus server might have been stopped. Please start ADManager Plus server and try again.</li>
+				<li>Check the port number. By default, it will be 8080 for HTTP and 8443 for HTTPS; but it can be changed.</li>
+				<li>Check if the firewall is blocking the specified port from being accessed.</li>
+				<li>Try using the IP Address of the machine on which the ADManager Plus server is running.</li>
+				<li>Check whether the ADManager Plus server is reachable from the MID Server.</li>
+				<li>Check the configured MID server in ServiceNow console under 'ADManager Plus → Setup'; check whether the correct hostname is configured in the MID server configuration and also if it is up and running.</li>
+				<li>If there isn't any MID server configured in the ADManager setup, check if the ADManager server is hosted in the internet and is accessible from an external network</li>
+			</ul>	
+		</li>
+		<li>After the ADManager Plus server connection is established, if any error occurs after submitting the login credentials, then:
+			<ul type="square">
+				<li>Try to log-in to the web application with same username, password and domain name, through any web browser.</li>
+				<li>Check whether the right domain is selected in the ADManager application setup.</li>
+				<li>If the user is using the AD user credentials, confirm whether the user has been added as a technician in ADManager Plus server.</li>
+			</ul>	
+		</li><li>If the valid user objects are not appearing in the AD Users List for the given search term:
+			<ul type="square">
+				<li>Try refreshing the domain to update the user objects in ADManager Plus. It can be accessed through Domain Settings → 'Refresh Domain' in domain record.</li>
+				<li>Check if DisplayName, FullName or sAMAccountName attributes in AD contains the required search term text.
+</li>
+			</ul>	
+		</li><li>If ADManager Plus server returns 'Access denied' error message for the AD Action submitted:
+			<ul type="square">
+				<li>Check if the ADManager Plus technician(whose credentials are used in the application setup) have required permission to do the specific management operation on the active directory.</li>
+				<li>If 'Impersonate as Admin' was selected while creating the technician in ADManager Plus, then check whether the ADManager Plus Admin has the required permissions in AD to make those operations.</li>
+			</ul>	
+		</li><li>If the AD action execution call returns an error message with 8-digit error codes, the error might be caused in Active Directory and the error code might be the Windows error code. In that case troubleshooting tips for that error code can be found in this link: http://demo.admanagerplus.com/help/misc/troubleshooting_tips.html#Active_Directory_User_Management
+		</li>
+			<li>If the ADManager Templates-to-domain mapping is not proper with the configured domain names, try editing and saving the template without changing anything on the ADManager Plus server.
+		</li><li>If the domain name is appearing on any AD User management action form, check the following scenarios:
+			<ul type="square">
+				<li>Check whether the domain is configured in the ADManager Plus server. If not, add the domain on the server and then re-login with the credentials on the ADManager Plus → Setup in the scoped application.</li>
+				<li>Check if the particular domain in delegated to the user account which is being used in the ADManager Plus application.</li>
+				<li>Re-Login in the "ADManager Plus → Setup" page and then check in the 'Create User in AD' page.</li>
+			</ul>	
+		</li>
+		</ol>
+
+
+
+
+	</div>
+</j:jelly>]]></html>
+        <name>ADManger Support</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-05-05 07:53:50</sys_created_on>
+        <sys_id>ca3e28e9db62be00360eda11cf961976</sys_id>
+        <sys_mod_count>22</sys_mod_count>
+        <sys_name>ADManger Support</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_ui_page_ca3e28e9db62be00360eda11cf961976</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-10-06 07:22:05</sys_updated_on>
+    </sys_ui_page>
+</record_update>

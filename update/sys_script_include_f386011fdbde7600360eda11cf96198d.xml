@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_manen_admanager.ADManagerTemplateHandler</api_name>
+        <client_callable>true</client_callable>
+        <description>ADManager Template Handler</description>
+        <name>ADManagerTemplateHandler</name>
+        <script><![CDATA[/*
+ * ADManager Template Handler
+ */
+var ADManagerTemplateHandler = Class.create();
+ADManagerTemplateHandler.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+	getDefaultTemplate:function()
+	{
+		var templateRecord = new GlideRecord('x_manen_admanager_admanagersuctemplatelist');
+		templateRecord.addQuery('template_id', 12); // To get System template name
+		templateRecord.query();
+		var templateName = '';
+		if(templateRecord.next())
+		{
+			templateName = templateRecord.template_display_name	;
+		}
+
+		if(templateName == '') // If system_template not available, then load the first record
+		{
+			templateRecord = new GlideRecord('x_manen_admanager_admanagersuctemplatelist');
+			templateRecord.query();
+			templateRecord.next();
+			templateName = templateRecord.sys_id;
+		}
+		return templateName;
+	},
+	getTemplateList: function()
+	{
+		var templateList = [];
+
+		var templateGr = new GlideRecord('x_manen_admanager_admanagersuctemplatelist'); 
+		var domainName = this.getParameter('domainName');
+		
+		if(domainName)
+		{
+			var domainId = new ADManagerDomainListHandler().getDomainId(domainName);
+			templateGr.addQuery('domain_id', domainId);
+		}
+		templateGr.query();  
+		while (templateGr.next()){  
+			var templateDetails = {};
+			templateDetails.templateName = templateGr.template_display_name.toString();
+			templateDetails.isDefault = templateGr.isdefault.toString();
+			templateList.push(templateDetails);
+		}
+		return new global.JSON().encode(templateList);
+	},
+	getTemplateName: function(templateDisplayName)
+	{
+		var templateRecord = new GlideRecord('x_manen_admanager_admanagersuctemplatelist');
+		templateRecord.addQuery('template_display_name', templateDisplayName); // To get System template name
+		templateRecord.query();
+		var templateName = templateDisplayName;
+		if(templateRecord.next())
+		{
+			templateName = templateRecord.template_name;
+		}
+		return templateName.toString();
+	},
+	type: 'ADManagerTemplateHandler'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-04-28 09:52:42</sys_created_on>
+        <sys_id>f386011fdbde7600360eda11cf96198d</sys_id>
+        <sys_mod_count>12</sys_mod_count>
+        <sys_name>ADManagerTemplateHandler</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_script_include_f386011fdbde7600360eda11cf96198d</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-10-06 07:39:29</sys_updated_on>
+    </sys_script_include>
+</record_update>

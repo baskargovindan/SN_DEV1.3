@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_macro">
+    <sys_ui_macro action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <category>general</category>
+        <description/>
+        <media_type/>
+        <name>ADManager Manager Field</name>
+        <scoped_name>x_manen_admanager_ADManager Manager Field</scoped_name>
+        <sys_class_name>sys_ui_macro</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-07-13 13:26:47</sys_created_on>
+        <sys_id>f15099f3dbfbfac0360eda11cf96195f</sys_id>
+        <sys_mod_count>13</sys_mod_count>
+        <sys_name>ADManager Manager Field</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_ui_macro_f15099f3dbfbfac0360eda11cf96195f</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-10-06 07:37:51</sys_updated_on>
+        <xml><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<tr parent_container_id="" style='padding-top:-100;'>
+		<td class="iotd"> 
+			<div class="row sc-row">
+				<div class="form-group  sc-row">
+					<div nowrap="true" class="">
+						<label class="col-xs-12 control-label">
+							<span title="" class=" required-marker" aria-label="" oclass="" mandatory="false" data-original-title="">
+							</span>
+							<img style="width:1px; margin-right:0px; margin-left:0px" src="images/s.gifx"/>
+							<span data-toggle="tooltip" class="sn-tooltip-basic " data-placement="auto" data-original-title="" title="">Manager</span>
+						</label>
+					</div>
+					<div class="col-xs-3 form-field input_controls">
+						<input type="text" class="cat_item_option sc-content-pad form-control" value="" maxlength="" name="setManager" id="setManager" disabled="disabled"/>
+
+
+					</div>
+					<button onclick="openManagerListPopup()" id="select_manager" type="button" style="margin-left:8px;">
+						 <img src="icon_manager.png" width="15" height="15"/>
+					</button>
+					<button onclick="clearManager()" id="clear_manager">
+						<a href="#" class="linkblacktxt" style="display: block; text-decoration:none;"><img src="icon_clear.png" width="15" height="15"/><span style="color:black;">Clear</span></a>
+					</button>
+				</div>
+			</div>
+		</td>
+	</tr>
+	<style type="text/css">
+		.button{
+		background: url(addToGroup.png) no-repeat;
+		background-size: 25px 25px;
+		cursor:pointer;
+		border: none;
+		padding:10px;
+		}
+		.equalButton{
+		padding:5px;
+		margin-left:5px;
+		}
+	</style>
+	<script>
+		var selectedManager = [];
+		function openManagerListPopup()
+		{
+		var dialog = new GlideDialogWindow("x_manen_admanager_ADManager Managers List");   
+		dialog.setTitle("Set a Manager");   
+		dialog.setSize(750,400);
+		dialog.setPreference("selectedDomain", g_form.getValue('Select_Domain')); //Pass in a short description for use in the dialog
+		dialog.setPreference("selectedManager", selectedManager);
+		dialog.render();  
+		}
+		function updateForm()
+		{
+		$j("#setManager").val(selectedManager[0].name);
+		}
+		function clearManager()
+		{
+		$j("#setManager").val('');
+		}
+		function getManagerName()
+		{
+			if(selectedManager.length > 0)
+				return selectedManager[0].name;
+			else
+				return '';
+		}
+		function getManagerDN()
+		{
+			if(selectedManager.length > 0)
+				return (selectedManager[0].distinguishedname);
+			else
+				return '';
+		}
+		function setManagerDetails(managerName, managerDN)
+		{
+			$j("#setManager").val(managerName);
+			var manager = {};
+			manager.name = managerName;
+			manager.distinguishedname = managerDN;
+			selectedManager.push(manager);
+		}
+		function disableManagerSelection()
+		{
+			$j("#select_manager").prop('disabled', true);;
+			$j("#clear_manager").prop('disabled', true);;
+		}
+		
+	</script>
+</j:jelly>]]></xml>
+    </sys_ui_macro>
+</record_update>

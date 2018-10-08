@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_manen_admanager.ADManagerGroupListHandler</api_name>
+        <client_callable>true</client_callable>
+        <description>ADManagerGroupListHandler</description>
+        <name>ADManagerGroupListHandler</name>
+        <script><![CDATA[var ADManagerGroupListHandler = Class.create();
+ADManagerGroupListHandler.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+	getADGroupList: function()
+	{
+		var resultJSON = {};
+		var searchText = this.getParameter('searchText');
+		var domainName = this.getParameter('domainName');
+		var startIndex = this.getParameter('startIndex');
+		var range = this.getParameter('range');
+		var isPrimaryGroup = this.getParameter('isPrimaryGroup');
+				
+		var responseJSON = this.doPost(domainName, searchText, startIndex, range, isPrimaryGroup);
+		responseJSON = new global.JSON().decode(responseJSON);
+		
+		if(responseJSON.status == 'true')
+		{
+			var groupListJSON =  new global.JSON().decode(responseJSON.responseBody);
+			var count = groupListJSON.count;
+			var groupList = groupListJSON.GroupList;
+
+			resultJSON.count = count;
+			resultJSON.startIndex = startIndex;
+			var endIndex = parseInt(startIndex)+parseInt(range)-1;
+			resultJSON.endIndex = (endIndex<=count)?endIndex:count;
+			resultJSON.groupList = groupList;
+			resultJSON.status = 'true';
+		} 
+		else
+		{
+			resultJSON.status = 'false';
+			if(resultJSON.statusMessage != null && resultJSON.statusMessage != "")
+				resultJSON.responseBody = responseJSON.statusMessage;
+			resultJSON.responseBody = responseJSON.responseBody;
+		}
+		return new global.JSON().encode(resultJSON);
+	},
+	/* Fetch ADUSer List from ADManager
+	 * Params : domainName, searchText, startIndex, range;
+	 */
+	doPost: function(domainName, searchText, startIndex, range, isPrimaryGroup)
+	{
+		var requestBody, responseBody, responseCode, sm;
+		var responseJSON = {};
+
+		var authHandler = new ADManagerAuthHandler();
+		var serverHandler = new ADManagerServerDetails();
+
+		var authToken = authHandler.getAuthToken();
+		if(authToken == '')// If Authtoken not present in DB.
+		{
+			responseJSON.responseBody = 'ADManager is not yet authenticated. Please login with valid credentials.';
+			responseJSON.status = 'false';
+			return new global.JSON().encode(responseJSON);
+		}
+		var url = serverHandler.getURL();	
+		try{
+			sm = new sn_ws.RESTMessageV2("ADManagerADGroupList", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+			sm.setStringParameter('AuthToken', authToken);  
+			sm.setStringParameter('url', url);
+			sm.setStringParameter('domainName', domainName);
+			sm.setStringParameter('RANGE', range);
+			sm.setStringParameter('FROM_INDEX', startIndex);
+			sm.setStringParameterNoEscape('searchText', searchText);
+			sm.setStringParameter('isPrimaryGroup', isPrimaryGroup);
+			
+			sm.setHttpTimeout(10000); //In milliseconds. Wait at most 10 seconds for response from http request.
+			response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+		return new global.JSON().encode(responseJSON); // JSON Object --> JSON String;
+	},
+	getGroupsWithPermissions: function()
+	{
+		var resultJSON = {};
+		var domainName = this.getParameter('domainName');
+		var folderPath = this.getParameter('folderPath');
+		var folderType = this.getParameter('folderType');
+		var permissions = this.getParameter('permissions');
+		
+	
+		var requestBody, responseBody, responseCode, sm;
+		var responseJSON = {};
+
+		var authHandler = new ADManagerAuthHandler();
+		var serverHandler = new ADManagerServerDetails();
+
+		var authToken = authHandler.getAuthToken();
+		if(authToken == '')// If Authtoken not present in DB.
+		{
+			responseJSON.responseBody = 'ADManager is not yet authenticated. Please login with valid credentials.';
+			responseJSON.status = 'false';
+			return new global.JSON().encode(responseJSON);
+		}
+		
+		var url = serverHandler.getURL();	
+		try{
+			sm = new sn_ws.RESTMessageV2("ADManagerGroupListWithPermissions", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+			sm.setStringParameter('AuthToken', authToken);  
+			sm.setStringParameter('url', url);
+			sm.setStringParameter('domainName', domainName);
+			sm.setStringParameterNoEscape('folderPath', folderPath);
+			sm.setStringParameter('folderType', folderType);
+			sm.setStringParameterNoEscape('permissions', permissions);
+			
+			sm.setHttpTimeout(10000); //In milliseconds. Wait at most 10 seconds for response from http request.
+			response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+		
+		if(responseJSON.status == 'true')
+		{
+			var groupListJSON =  new global.JSON().decode(responseJSON.responseBody);
+			var count = groupListJSON.GROUP_COUNT;
+			var groupList = groupListJSON.GROUP_LIST;
+
+			resultJSON.count = count;
+			resultJSON.startIndex = 1;
+			var endIndex = count;
+			resultJSON.endIndex = (endIndex<=count)?endIndex:count;
+			resultJSON.groupList = groupList;
+			resultJSON.status = 'true';
+		} 
+		else
+		{
+			resultJSON.status = 'false';
+			resultJSON.responseBody = responseJSON.responseBody;
+		}
+		return new global.JSON().encode(resultJSON);
+	},
+    type: 'ADManagerGroupListHandler'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-07-13 13:37:17</sys_created_on>
+        <sys_id>c6b2dd77dbfbfac0360eda11cf96192e</sys_id>
+        <sys_mod_count>14</sys_mod_count>
+        <sys_name>ADManagerGroupListHandler</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_script_include_c6b2dd77dbfbfac0360eda11cf96192e</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-03-15 16:19:08</sys_updated_on>
+    </sys_script_include>
+</record_update>

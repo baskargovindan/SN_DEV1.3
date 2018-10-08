@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_macro">
+    <sys_ui_macro action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <category>general</category>
+        <description>User Search &amp; Submit Button</description>
+        <media_type/>
+        <name>ADManagerMgmtButtons</name>
+        <scoped_name>x_manen_admanager_ADManagerMgmtButtons</scoped_name>
+        <sys_class_name>sys_ui_macro</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-04-28 09:46:48</sys_created_on>
+        <sys_id>ec358d9bdbde7600360eda11cf961927</sys_id>
+        <sys_mod_count>5</sys_mod_count>
+        <sys_name>ADManagerMgmtButtons</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_ui_macro_ec358d9bdbde7600360eda11cf961927</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-03-06 16:32:37</sys_updated_on>
+        <xml><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	
+	<button href="#" type="button" onclick="searchUsers();" name="search_button" id="search_button" title="" class="header_button btn cat-btn btn-primary" aria-label="Search"  style="display: none;" data-original-title="Search">Search</button>
+	
+	<button href="#" type="button" onclick="saveProducer('');" name="admp_submit_button" id="admp_submit_button" title="" class="header_button btn cat-btn btn-primary" aria-label="Submit" style="display: none;" data-original-title="Submit">Submit</button>
+	<script>
+		function showSearchButton()
+		{
+			$j("#search_button").show();
+		}
+		function hideSubmitButton()
+		{
+			$j("#submit_button").hide();
+			$j("#admp_submit_button").hide();
+		}
+		function showSubmitButton()
+		{
+			$j("#admp_submit_button").show();
+		}
+		function searchUsers(startIndex, range)
+		{
+			g_form.clearMessages();
+			if(!startIndex)
+			{
+				if(g_form.getValue('Name') == '')
+				{
+					alert('Please enter a user name');
+					return false;
+				}
+			}
+			var dialogWindow = getDialogWindow();
+			dialogWindow.render();
+
+			if(!startIndex)
+			startIndex = 1;
+			if(!range)
+			range = 20;
+
+			var domainName = g_form.getValue('Select_Domain');
+			var searchText = g_form.getValue('Name');
+			searchText = searchText.replace(/\\/g, '\\\\');
+		
+			var userDetailsAjax = new GlideAjax("ADManagerUserListHandler");
+			userDetailsAjax.addParam("sysparm_name","getADUsersList");
+			userDetailsAjax.addParam("searchText",searchText);
+			userDetailsAjax.addParam("domainName",domainName);
+			userDetailsAjax.addParam("startIndex",startIndex);
+			userDetailsAjax.addParam("range",range);
+			userDetailsAjax.getXMLAnswer(userDetailsResponse);
+
+			function userDetailsResponse(userDetails) 
+			{
+				var result = userDetails.evalJSON(); 
+				if(result.status == 'true')
+				{
+					loadUserList(userDetails, false, dialogWindow);
+				}
+				else
+				{
+					dialogWindow.destroy();
+				}
+			}
+		}
+	</script>
+</j:jelly>]]></xml>
+    </sys_ui_macro>
+</record_update>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>ADManager Add to Group Common client Scripts</description>
+        <global>false</global>
+        <name>x_manen_admanager.ADManagerAddToGroupUti</name>
+        <script><![CDATA[var addGroups = [];
+var objectType = 'User';
+function openGroupListPopup(groupListType){
+	slidUpGroupsList();
+	var selectedGroups = addGroups;
+	var dialog = new GlideDialogWindow("x_manen_admanager_ADManager Group List");   
+	dialog.setTitle("Select Group");   
+	dialog.setSize(750,400);
+	dialog.setPreference("domainName", g_form.getValue('Select_Domain')); //Pass in a short description for use in the dialog
+	dialog.setPreference("groupListType", groupListType);
+	dialog.setPreference("selectedGroups", selectedGroups);
+	dialog.render();   
+}
+function updateForm()
+{
+	$j("#addToGroupInput").val(addGroups.length>0?addGroups.length>1?addGroups[0].groupName+', ...':addGroups[0].groupName:'');
+}
+function showAddToGroupList()
+{
+	if (($j("#addToGroupList").css('display') === 'none')) {
+		updateAddToGroupsList();
+		$j("#addToGroupList").slideDown( "slow" );
+	}
+	else
+	{
+		$j("#addToGroupList").slideUp( "slow" );
+	}
+}
+function updateAddToGroupsList()
+{
+	var selectedGroupsHtml = '';
+	if(addGroups == 0)
+	{
+		selectedGroupsHtml = '<tr><td style="padding-top: 30px;"><span style="display:block; text-align:center; margin:0 auto;">No records to display</span></td></tr>';
+	}
+
+	for(var i=0; i<addGroups.length;i++)
+	{
+		var escapedGroupName = (addGroups[i].groupName).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+		selectedGroupsHtml = selectedGroupsHtml+'<tr style="margin-left:5px;"><td style="height:20px;width:90%; ">'+escapedGroupName+'</td><td style="width:10%;"><button onclick="removeGroupFromList(this)" value="'+encodeURI(addGroups[i].groupName)+'" type="button" id="removeButton_'+escapedGroupName+'"class="equalButton" style="padding: 0;border: none;"><img   src="xbutton.png"  width="8" height="8"></img></button></td></tr>';
+	}
+	$j("#addToGroupListBody").html(selectedGroupsHtml);
+	$j("#addToGroupInput").val(addGroups.length>0?addGroups.length>1?addGroups[0].groupName+', ...':addGroups[0].groupName:'');
+
+}
+function removeGroupFromList(obj)
+{
+	for(var i=0; i<addGroups.length; i++)
+	{
+		if(addGroups[i].groupName == decodeURI($j(obj).val()))
+		{
+			addGroups.splice(i, 1);
+			updateAddToGroupsList();
+		}
+	}
+}
+function slidUpGroupsList()
+{
+	$j("#addToGroupList").slideUp( "slow" );
+}
+function setAddGroups(groups)
+{
+	addGroups = groups;
+	updateForm();
+}
+function setObjectType(type)
+{
+	objectType = type;
+}
+function getAddGroups()
+{
+	return addGroups;
+}
+function getObjectType()
+{
+	return objectType;
+}
+function removeEmptyVars()
+{
+	//TODO
+}
+function disableButtons()
+{
+	$j("#showAddToGroupList").prop('disabled', true);
+	$j("#openGroupListPopup").prop('disabled', true);
+}]]></script>
+        <script_name>ADManagerAddToGroupUtil</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-11-21 10:22:50</sys_created_on>
+        <sys_id>1e3e83b1dba68300360eda11cf9619ce</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>x_manen_admanager.ADManagerAddToGroupUti</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_ui_script_1e3e83b1dba68300360eda11cf9619ce</sys_update_name>
+        <sys_updated_by>Baskar</sys_updated_by>
+        <sys_updated_on>2017-12-13 13:16:48</sys_updated_on>
+        <ui_type/>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

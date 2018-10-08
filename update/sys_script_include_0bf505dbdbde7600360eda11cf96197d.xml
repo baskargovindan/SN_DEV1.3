@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_manen_admanager.ADManagerCommonUtil</api_name>
+        <client_callable>true</client_callable>
+        <description>ADManager Common Util</description>
+        <name>ADManagerCommonUtil</name>
+        <script><![CDATA[/*
+ * ADMAnager Common Util 
+ */
+var ADManagerCommonUtil = Class.create();
+ADManagerCommonUtil.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+	/*
+	* This will return all data present in the request details column of incident table.
+	*/
+	loadDefaultValues: function()
+	{
+		var requestDetails = {};
+		// Check for compatibility
+		if(!this.checkServerCompatibility())
+		{
+			requestDetails.status = 'false';
+			requestDetails.responseBody = 'To use this feature, upgrade ADManager Plus server to 6591 or later versions. Contact support@admanagerplus.com to upgrade.';
+			return new global.JSON().encode(requestDetails);
+		}
+		if(new ADManagerServerDetails().isServerConfigured()) // To check wheather the server is configured / not.
+		{
+			var sys_id = this.getParameter('sys_id');
+			requestDetails = new ADManagerIncidentHandler().getIncidentDetails(sys_id); // Get Incident record with sys_is;
+			requestDetails = new global.JSON().decode(requestDetails);
+			new ADManagerTemplateMgmtHandler().setDefaultTemplate(requestDetails.domainName, requestDetails.templateName); // This will set the fetched template name as default template name & use this in form.
+			requestDetails.domainList = new ADManagerDomainListHandler().getDomainList(this.getParameter('action_id'));	
+			requestDetails.status = 'true';
+		}
+		else
+		{
+			requestDetails.status = 'false';
+			requestDetails.responseBody = 'Please configure ADManager server or Contact you administrator for more details.';
+		}
+		
+		return new global.JSON().encode(requestDetails);
+	},
+	/*
+	 * Call ADManager for Template List
+	 */
+	getTemplateList: function()
+	{	
+		var formData = {};
+		var action_id = this.getParameter('action_id');
+		// To check whether the server is configured or not. If no, then throw a errror response.
+		var authorizedDomainList = new ADManagerDomainListHandler().getAuthorizedDomainList(action_id);
+		authorizedDomainList = authorizedDomainList.join();
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerdomaindetails');
+		detailsRecord.addQuery('domain_id', 'IN', authorizedDomainList);
+		detailsRecord.query();
+		if(!(new ADManagerServerDetails().isServerConfigured()) || detailsRecord.getRowCount() ==0)
+		{
+			formData.status = 'false';
+			formData.responseBody = 'Please configure ADManager server or Contact you administrator for more details.';
+			return new global.JSON().encode(formData);
+		}
+		// Check for compatibility
+		if(!this.checkServerCompatibility())
+		{
+			formData.status = 'false';
+			formData.responseBody = 'To use this feature, upgrade ADManager Plus server to 6591 or later versions. Contact support@admanagerplus.com to upgrade.';
+			return new global.JSON().encode(formData);
+		}
+		if(new ADManagerServerDetails().isServerConfigured()) 
+		{
+			formData = new ADManagerAPIUtil().getTemplateList(action_id);
+			formData = new global.JSON().decode(formData);
+
+			var domainNameList = new ADManagerDomainListHandler().getDomainList(action_id);
+			formData.domainList = domainNameList;
+		}
+		else
+		{
+			formData.status = 'false';
+			formData.responseBody = 'Please configure ADManager server or Contact you administrator for more details.';
+		}
+		return new global.JSON().encode(formData);
+	},
+	checkServerCompatibility: function()
+	{
+		var build_number = new ADManagerServerDetails().getProductVersion();
+		if(build_number != null  && build_number >= 6591)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	},
+	type: 'ADManagerCommonUtil'
+});
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-04-28 09:50:16</sys_created_on>
+        <sys_id>0bf505dbdbde7600360eda11cf96197d</sys_id>
+        <sys_mod_count>20</sys_mod_count>
+        <sys_name>ADManagerCommonUtil</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_script_include_0bf505dbdbde7600360eda11cf96197d</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-10-06 07:39:43</sys_updated_on>
+    </sys_script_include>
+</record_update>

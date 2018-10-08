@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sc_cat_item_category">
+    <sc_cat_item_category action="INSERT_OR_UPDATE">
+        <sc_cat_item display_value="Reset Password">98161d9fdb12b600360eda11cf961919</sc_cat_item>
+        <sc_category display_value="Active Directory Management">6dfacd53db12b600360eda11cf961944</sc_category>
+        <sys_class_name>sc_cat_item_category</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-04-28 11:00:16</sys_created_on>
+        <sys_id>dc161d9fdb12b600360eda11cf96191b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Active Directory Management.Copy of Enable User</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sc_cat_item_category_dc161d9fdb12b600360eda11cf96191b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-04-28 11:00:16</sys_updated_on>
+    </sc_cat_item_category>
+</record_update>

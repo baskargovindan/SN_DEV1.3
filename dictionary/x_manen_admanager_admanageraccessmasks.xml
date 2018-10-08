@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element label="ADManagerAccessMasks" max_length="40" name="x_manen_admanager_admanageraccessmasks" type="collection">
+        <element attributes="edge_encryption_enabled=true" label="ACCESS_MASK_ID" max_length="40" name="access_mask_id" type="integer"/>
+        <element label="ACCESS_MASK_STRING" max_length="40" name="access_mask_string" type="string"/>
+        <element attributes="edge_encryption_enabled=true" display="true" label="IS_ADVANCED_PERMISSION" max_length="40" name="is_advanced_permission" type="boolean"/>
+        <element label="OBJECT_TYPE" max_length="40" name="object_type" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="PRIORITY" max_length="40" name="priority" type="integer"/>
+    </element>
+</database>

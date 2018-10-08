@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_embedded_help_role">
+    <sys_embedded_help_role action="INSERT_OR_UPDATE">
+        <order>100</order>
+        <role display_value="x_manen_admanager.admanageraccessmaskmapping_user" name="x_manen_admanager.admanageraccessmaskmapping_user">5a53541bdb9013001de1fabdbf9619fc</role>
+        <sys_class_name>sys_embedded_help_role</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-02-20 12:25:29</sys_created_on>
+        <sys_id>9653541bdb9013001de1fabdbf9619fe</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>5a53541bdb9013001de1fabdbf9619fc</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_embedded_help_role_9653541bdb9013001de1fabdbf9619fe</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-02-20 12:25:29</sys_updated_on>
+    </sys_embedded_help_role>
+</record_update>

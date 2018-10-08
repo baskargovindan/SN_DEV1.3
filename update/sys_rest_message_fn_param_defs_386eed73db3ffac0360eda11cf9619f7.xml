@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_rest_message_fn_param_defs">
+    <sys_rest_message_fn_param_defs action="INSERT_OR_UPDATE">
+        <name>HANDSHAKE_KEY</name>
+        <order>100</order>
+        <rest_message_function display_value="post">36ce919bdb52b600360eda11cf961949</rest_message_function>
+        <sys_class_name>sys_rest_message_fn_param_defs</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-07-13 15:47:22</sys_created_on>
+        <sys_id>386eed73db3ffac0360eda11cf9619f7</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>HANDSHAKE_KEY</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_rest_message_fn_param_defs_386eed73db3ffac0360eda11cf9619f7</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-07-13 15:47:22</sys_updated_on>
+        <value>${HANDSHAKE_KEY}</value>
+    </sys_rest_message_fn_param_defs>
+</record_update>

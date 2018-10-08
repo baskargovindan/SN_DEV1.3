@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element label="ADManagerLoginDomainDetails" max_length="40" name="x_manen_admanager_admanagerlogindomaindetails" type="collection">
+        <element label="Domain Flat Name" mandatory="true" max_length="255" name="domain_flat_name" type="string"/>
+        <element display="true" label="Domain Name" max_length="255" name="domain_name" type="string"/>
+    </element>
+</database>

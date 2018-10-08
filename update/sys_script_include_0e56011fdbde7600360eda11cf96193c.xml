@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_manen_admanager.ADManagerMIDServerHandler</api_name>
+        <client_callable>false</client_callable>
+        <description>ADManager MID Server Handler</description>
+        <name>ADManagerMIDServerHandler</name>
+        <script><![CDATA[/*
+ * ADManager MIDServer Handler
+ */
+var ADManagerMIDServerHandler = Class.create();
+ADManagerMIDServerHandler.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+	// This will update MIDServer field in all ADManger rest messages with user provided mid server;
+	
+	setMIDServerToRestMessages: function(sys_id)
+	{
+		var restMessageRecord = new GlideRecord('sys_rest_message_fn');
+		restMessageRecord.addQuery('rest_endpoint', 'IN', '${url}/MobileAPI/ADUserList, ${url}/RestAPI/CreateBulkUser, ${url}/ADMPAPI/DeleteUser, ${url}/ADMPAPI/EnableUser, ${url}/ADMPAPI/DisableUser, ${url}/RestAPI/APIAuthToken, ${url}/MobileAPI/MobileLogin, ${url}/ADMPAPI/ResetPwd, ${url}/MobileAPI/MTemplateNames, ${url}/ADMPAPI/UnlockUser, ${url}/ADMPAPI/ADGroupList, ${url}/ADMPAPI/AddRemoveGroups, ${url}/MobileAPI/getManagerValues, ${url}/RestAPI/ADGroupList, ${url}/servlet/GetProductVersion, ${url}/RestAPI/FSMFolderList, ${url}/RestAPI/GroupsWithPermission, ${url}/RestAPI/SetFolderPermissions, ${url}/RestAPI/RemoveFolderPermissions');
+		restMessageRecord.query();
+		while(restMessageRecord.next())
+		{
+			restMessageRecord.use_mid_server = sys_id;
+			restMessageRecord.update();
+		}
+	},
+    type: 'ADManagerMIDServerHandler'
+});
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-04-28 09:51:48</sys_created_on>
+        <sys_id>0e56011fdbde7600360eda11cf96193c</sys_id>
+        <sys_mod_count>10</sys_mod_count>
+        <sys_name>ADManagerMIDServerHandler</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_script_include_0e56011fdbde7600360eda11cf96193c</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-03-06 13:40:07</sys_updated_on>
+    </sys_script_include>
+</record_update>

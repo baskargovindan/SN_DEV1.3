@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_user_role_contains">
+    <sys_user_role_contains action="INSERT_OR_UPDATE">
+        <contains display_value="mid_server" name="mid_server">e76b74ba0ab3015700a3263b26e5e9d5</contains>
+        <role display_value="x_manen_admanager.admanager_admin" name="x_manen_admanager.admanager_admin">bb9845dfdbde7600360eda11cf961986</role>
+        <sys_class_name>sys_user_role_contains</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-10-06 04:43:09</sys_created_on>
+        <sys_id>02b7450fdb69c300360eda11cf96190b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>mid_server.x_manen_admanager.admanager_admin</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_user_role_contains_02b7450fdb69c300360eda11cf96190b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-10-06 04:43:09</sys_updated_on>
+    </sys_user_role_contains>
+</record_update>

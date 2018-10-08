@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_manen_admanager.ADManagerIncidentHandler</api_name>
+        <client_callable>true</client_callable>
+        <description>ADManager Incident Handler</description>
+        <name>ADManagerIncidentHandler</name>
+        <script><![CDATA[/*
+* ADManager Incident Handler
+*/
+var ADManagerIncidentHandler = Class.create();
+ADManagerIncidentHandler.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+	// Create a new incident 
+	createIncident: function()
+	{
+		var requestDetails = this.getParameter('requestDetails');
+		var description = this.getParameter('description');
+		var comments = this.getParameter('comments');
+		var secureData = this.getParameter('secureData');
+		//create a new incident
+		var user_id = gs.getUser().getName();
+		try
+		{
+			// TO get sys_id for the current user;
+			var userRecord = new GlideRecord('sys_user');
+			userRecord.addQuery('user_name', user_id);
+			userRecord.query();
+			if (userRecord.next()) { 
+				var domainRecord = new GlideRecord('incident');
+				domainRecord.initialize(); 
+				domainRecord.caller_id = userRecord.sys_id; 
+				domainRecord.short_description = description; 
+				
+				domainRecord.x_manen_admanager_admanager_request_details = secureData;
+				domainRecord.x_manen_admanager_admanager_request_details_public = requestDetails;
+				domainRecord.comments = comments;
+				domainRecord.insert();
+			}			
+		}
+		catch(e)
+		{
+			gs.addErrorMessage(e.getMessage());
+		}
+	},
+	// Get Request details from request details column in incident table;
+	getIncidentDetails: function(sys_id)
+	{
+		var detailsRecord = new GlideRecord('incident');
+		detailsRecord.addQuery('sys_id', sys_id);
+		detailsRecord.query();
+		var requestDetails = '{}';
+		if (detailsRecord.next()) { 
+			 requestDetails = detailsRecord.x_manen_admanager_admanager_request_details_public;
+			if(requestDetails == '' || !requestDetails)
+				requestDetails = '{}';
+			
+			var secureData = detailsRecord.x_manen_admanager_admanager_request_details;
+			if(secureData != '' || secureData)
+			{
+				requestDetails = new global.JSON().decode(requestDetails);
+				requestDetails.secureData = secureData.toString();
+				requestDetails = new global.JSON().encode(requestDetails);
+			}
+		}
+		return requestDetails;
+	},
+	addComments: function()
+	{
+		var comments = this.getParameter('comments');
+		var sys_id = this.getParameter('sys_id');
+		var detailsRecord = new GlideRecord('incident');
+		detailsRecord.addQuery('sys_id', sys_id);
+		detailsRecord.query();
+		if(detailsRecord.next())
+		{
+			detailsRecord.comments = comments;
+			detailsRecord.update();
+		}
+	},
+	type: 'ADManagerIncidentHandler'
+});
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-04-28 09:51:27</sys_created_on>
+        <sys_id>cc46451fdbde7600360eda11cf96193f</sys_id>
+        <sys_mod_count>21</sys_mod_count>
+        <sys_name>ADManagerIncidentHandler</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_script_include_cc46451fdbde7600360eda11cf96193f</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-10-06 07:39:36</sys_updated_on>
+    </sys_script_include>
+</record_update>

@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script><![CDATA[var addGroups = [];
+var removeGroups = [];
+var primaryGroup = [];
+var objectType = 'User';
+function openGroupListPopup(groupListType){
+	slidUpGroupsList();
+	var selectedGroups = [];
+	if(groupListType == 1)
+		selectedGroups = addGroups;
+	else if(groupListType == 2)
+		selectedGroups = removeGroups;
+	else if(groupListType == 3)
+		selectedGroups = primaryGroup;
+
+	var dialog = new GlideDialogWindow("x_manen_admanager_ADManager Group List");   
+	dialog.setTitle("Select Group");   
+	dialog.setSize(750,400);
+	dialog.setPreference("domainName", g_form.getValue('Select_Domain')); //Pass in a short description for use in the dialog
+	dialog.setPreference("groupListType", groupListType);
+	dialog.setPreference("selectedGroups", selectedGroups);
+	dialog.render();   
+}
+function updateForm()
+{
+	$j("#addToGroupInput").val(addGroups.length>0?addGroups.length>1?addGroups[0].groupName+', ...':addGroups[0].groupName:'');
+	$j("#removeFromGroupInput").val(removeGroups.length>0?removeGroups.length>1?removeGroups[0].groupName+', ...':removeGroups[0].groupName:'');
+	$j("#setPrimaryGroupInput").val(primaryGroup.length>0?primaryGroup[0].primaryGroupName:'');
+}
+function showAddToGroupList()
+{
+	if (($j("#addToGroupList").css('display') === 'none')) {
+		updateAddToGroupsList();
+		$j("#addToGroupList").slideDown( "slow" );
+		$j("#removeFromGroupList").slideUp( "slow" );
+	}
+	else
+	{
+		$j("#addToGroupList").slideUp( "slow" );
+	}
+}
+function showRemoveFromGroupList()
+{
+	if (($j("#removeFromGroupList").css('display') === 'none')) {
+		updateRemoveFromGroupsList();
+		$j("#removeFromGroupList").slideDown( "slow" );
+		$j("#addToGroupList").slideUp( "slow" );
+	}
+	else
+	{
+		$j("#removeFromGroupList").slideUp( "slow" );
+	}
+}
+function updateAddToGroupsList()
+{
+	var selectedGroupsHtml = '';
+	if(addGroups == 0)
+	{
+		selectedGroupsHtml = '<tr><td style="padding-top: 30px;"><span style="display:block; text-align:center; margin:0 auto;">No records to display</span></td></tr>';
+	}
+
+	for(var i=0; i<addGroups.length;i++)
+	{
+		selectedGroupsHtml = selectedGroupsHtml+'<tr style="margin-left:5px;"><td style="height:20px;width:90%; ">'+addGroups[i].groupName+'</td><td style="width:10%;"><button onclick="removeGroupFromList(1, \''+addGroups[i].groupName+'\')" type="button" id="removeButton_'+addGroups[i].groupName+'"class="equalButton" style="padding: 0;border: none;"><img   src="xbutton.png"  width="8" height="8"></img></button></td></tr>';
+	}
+	$j("#addToGroupListBody").html(selectedGroupsHtml);
+	$j("#addToGroupInput").val(addGroups.length>0?addGroups.length>1?addGroups[0].groupName+', ...':addGroups[0].groupName:'');
+
+}
+function updateRemoveFromGroupsList()
+{
+	var selectedGroupsHtml = '';
+	if(removeGroups ==0){
+		selectedGroupsHtml = '<tr><td style="padding-top: 30px;"><span style="display:block; text-align:center; margin:0 auto;">No records to display</span></td></tr>';
+	}
+
+	for(var i=0; i<removeGroups.length;i++)
+	{
+		selectedGroupsHtml = selectedGroupsHtml+'<tr style="margin-left:5px;"><td style="height:20px;width:90%; ">'+removeGroups[i].groupName+'</td><td style="width:10%;"><button onclick="removeGroupFromList(2, \''+removeGroups[i].groupName+'\');" type="button" class="equalButton" style="padding: 0;border: none;"><img   src="xbutton.png"  width="8" height="8"></img></button></td></tr>';
+	}
+	$j("#removeFromGroupListBody").html(selectedGroupsHtml);
+	$j("#removeFromGroupInput").val(removeGroups.length>0?removeGroups.length>1?removeGroups[0].groupName+', ...':removeGroups[0].groupName:'');
+}
+function removeGroupFromList(groupId, groupName)
+{
+	if(groupId == 1)
+	{
+		for(var i=0; i<addGroups.length; i++)
+		{
+			if(addGroups[i].groupName == groupName)
+			{
+				addGroups.splice(i, 1);
+				updateAddToGroupsList();
+			}
+		}
+	}
+	else if(groupId == 2)
+	{
+		for(var j=0; j<removeGroups.length; j++)
+		{			
+			if(removeGroups[j].groupName == groupName)
+			{
+				removeGroups.splice(j, 1);
+				updateRemoveFromGroupsList();
+			}
+		}
+	}
+}
+function slidUpGroupsList()
+{
+	$j("#addToGroupList").slideUp( "slow" );
+	$j("#removeFromGroupList").slideUp( "slow" );
+}
+function setAddGroups(groups)
+{
+	addGroups = groups;
+	updateForm();
+}
+function setRemoveGroups(groups)
+{
+	removeGroups = groups;
+	updateForm();
+}
+function setPrimaryGroup(group)
+{
+	primaryGroup = [];
+	primaryGroup.push(group);
+	updateForm();
+}
+function setObjectType(type)
+{
+	objectType = type;
+}
+function getAddGroups()
+{
+	return addGroups;
+}
+function getRemoveGroups()
+{
+	if(isRemoveFromAllGroup())
+		return [];
+	return removeGroups;
+}
+function getPrimaryGroup()
+{
+	if(primaryGroup.length >0)
+		return primaryGroup[0];
+	else
+		return {};
+}
+function getObjectType()
+{
+	return objectType;
+}
+function isRemoveFromAllGroup()
+{
+	return $j("#clearAllGroupMembership").prop("checked");
+}
+function removePrimary()
+{
+	primaryGroup = [];
+	updateForm();
+}
+function clearAllGroupMembershipClicked(element)
+{
+	toggleRemoveGroupsField(element.checked); 
+}
+
+function toggleRemoveGroupsField(isRemoveFromAllGroups)
+{
+	if(isRemoveFromAllGroups)
+	{
+		$j("#editAddGroupButton").hide();
+		$j("#addGroupButton").hide();
+		$j("#removeFromGroupDiv").hide();
+	}
+	else
+	{
+		$j("#editAddGroupButton").show();
+		$j("#addGroupButton").show();
+		$j("#removeFromGroupDiv").show();
+	}
+	slidUpGroupsList();
+}]]></client_script>
+        <description/>
+        <direct>false</direct>
+        <endpoint>x_manen_admanager_ADManager Group Membership.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<g:macro_invoke macro="DomainOnChange" />
+	<style type="text/css">
+		.button{
+		background: url(addToGroup.png) no-repeat;
+		background-size: 25px 25px;
+		cursor:pointer;
+		border: none;
+		padding:10px;
+		}
+		.equalButton{
+		padding:10px;
+		margin-left:5px;
+		}
+		.floatDiv{
+		position:relative;
+		width:24%;
+		<!-- top:66px; -->
+		left:1%;
+		height:165px;
+		border-radius: 4px;
+		}
+	</style>
+
+	<tr parent_container_id="" style='padding-top:-100;'>
+		<td class="iotd"> 
+			<div class="row sc-row">
+				<div class="form-group  sc-row">
+					<div nowrap="true" class="">
+						<label class="col-xs-12 control-label">
+							<span title="" class=" required-marker" aria-label="" oclass="" mandatory="false" data-original-title="">
+							</span>
+							<img style="width:1px; margin-right:0px; margin-left:0px" src="images/s.gifx"/>
+							<span data-toggle="tooltip" class="sn-tooltip-basic " data-placement="auto" data-original-title="" title="">Add To Group</span>
+						</label>
+					</div>
+					<div class="col-xs-3 form-field input_controls">
+						<input type="text" class="cat_item_option sc-content-pad form-control" value="" maxlength="" name="addToGroup" id="addToGroupInput"  disabled="disabled"/>
+					</div>
+
+					<button onclick="showAddToGroupList()" type="button" class="equalButton" style="margin-left:1px;">
+						<img   src="images/view_edit.pngx"  width="18" height="18"></img>
+					</button>
+					<button onclick="openGroupListPopup(1)" type="button" class="equalButton" style="margin-left:5px;">
+						<img   src="addToGroup.png"  width="18" height="18"></img>
+					</button>
+					<div class = "floatDiv" style="display:none; border: 1px solid #BDC0C4;" id="addToGroupList">
+						<table style="width:100%;">
+							<thead style=" width:100%; background:#E6E8EA">
+								<th style="height:20px;width:90%;">
+									Selected Groups
+								</th>
+								<th style="height:20px;width:10%;"><button onclick="showAddToGroupList();" type="button" class="equalButton" style="padding: 0;border: none;background:#E6E8EA"><img   src="images/x.gifx"  width="15" height="15"></img></button></th>
+							</thead>
+							<tbody>
+								<tr>
+									<td colspan="2">
+										<div style="overflow:auto;height:132px">
+											<table width="100%" border="0" cellspacing="0" cellpadding="0">
+												<tbody id = "addToGroupListBody" style="margin:10;padding:0">
+
+												</tbody>
+											</table>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+
+					</div>
+				</div>
+
+			</div>
+		</td>
+	</tr>
+
+	<tr parent_container_id="" style='padding-top:-100;'>
+		<td class="iotd"> 
+			<div class="row sc-row">
+				<div class="form-group  sc-row">
+					<div nowrap="true" class="">
+						<label class="col-xs-12 control-label">
+							<span title="" class=" required-marker" aria-label="" oclass="" mandatory="false" data-original-title="">
+							</span>
+							<img style="width:1px; margin-right:0px; margin-left:0px" src="images/s.gifx"/>
+							<span data-toggle="tooltip" class="sn-tooltip-basic " data-placement="auto" data-original-title="" title="">Remove From Group</span>
+						</label>
+					</div><div>
+					<div class="col-xs-3 form-field input_controls" id="removeFromGroupDiv">
+						<input type="text" class="cat_item_option sc-content-pad form-control" value="" maxlength="" name="removeFromGroup" id="removeFromGroupInput" disabled="disabled"/>
+
+
+					</div>
+					
+
+
+					<button onclick="showRemoveFromGroupList()" type="button" class="equalButton" style="margin-left:1px;" id="editAddGroupButton">
+						<img  src="images/view_edit.pngx"  width="18" height="18"></img>
+					</button>
+					<button onclick="openGroupListPopup(2)" type="button" class="equalButton" style="margin-left:5px;" id="addGroupButton">
+						<img src="removeFromGroup.png"  width="18" height="18"></img>
+					</button>
+					</div>
+					
+					<div class = "floatDiv" style="display:none; border: 1px solid #BDC0C4;" id="removeFromGroupList">
+						<table style="width:100%;">
+							<thead style=" width:100%; background:#E6E8EA">
+								<th style="height:20px;width:90%;">
+									Selected Groups
+								</th>
+								<th style="height:20px;width:10%;"><button onclick="showRemoveFromGroupList();" type="button" class="equalButton" style="padding: 0;border: none;background:#E6E8EA"><img   src="images/x.gifx"  width="15" height="15"></img></button></th>
+							</thead>
+							<tbody>
+								<tr>
+									<td colspan="2">
+										<div style="overflow:auto;height:132px">
+											<table width="100%" border="0" cellspacing="0" cellpadding="0">
+												<tbody id = "removeFromGroupListBody" style="margin:10;padding:0">
+
+												</tbody>
+											</table>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div>
+						<input type="checkbox" style="margin-left:20px;" id="clearAllGroupMembership" onclick="clearAllGroupMembershipClicked(this);"/>
+						<span>
+							Clear All Group Membership
+						</span>
+					</div>
+				</div>
+
+			</div>
+		</td>
+	</tr>
+	<tr parent_container_id="" style='padding-top:-100;'>
+		<td class="iotd"> 
+			<div class="row sc-row">
+				<div class="form-group  sc-row">
+					<div nowrap="true" class="">
+						<label class="col-xs-12 control-label">
+							<span title="" class=" required-marker" aria-label="" oclass="" mandatory="false" data-original-title="">
+							</span>
+							<img style="width:1px; margin-right:0px; margin-left:0px" src="images/s.gifx"/>
+							<span data-toggle="tooltip" class="sn-tooltip-basic " data-placement="auto" data-original-title="" title="">Set Primary Group</span>
+						</label>
+					</div>
+					<div class="col-xs-3 form-field input_controls">
+						<input type="text" class="cat_item_option sc-content-pad form-control" value="" maxlength="" name="setPrimaryGroup" id="setPrimaryGroupInput" disabled="disabled"/>
+
+
+					</div>
+					<button onclick="openGroupListPopup(3)" type="button" class="equalButton" style="margin-left:5px;">
+						<img src="setPrimaryGroup.png"  width="18" height="18"></img>
+					</button>
+					<button onclick="removePrimary()">
+						<a href="#" class="linkblacktxt" id="primaryGroup_div" style="display: block;">Clear</a>
+					</button>
+				</div>
+			</div>
+		</td>
+	</tr>
+</j:jelly>]]></html>
+        <name>ADManager Group Membership</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-07-13 13:19:13</sys_created_on>
+        <sys_id>159e4137dbfbfac0360eda11cf9619d8</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>ADManager Group Membership</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_ui_page_159e4137dbfbfac0360eda11cf9619d8</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-10-06 07:22:41</sys_updated_on>
+    </sys_ui_page>
+</record_update>

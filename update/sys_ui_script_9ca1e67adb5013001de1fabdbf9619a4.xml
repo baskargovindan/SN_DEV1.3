@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>ADManagerSetPermissionsUtil</description>
+        <global>false</global>
+        <name>x_manen_admanager.ADManagerSetPermission</name>
+        <script><![CDATA[var folders = [];
+var permissions = {};
+var preSelectedPermissions = {};
+
+function openFolderListPopup(){
+	slidUpFolderList();
+	var selectedFolders = folders;
+	var dialog = new GlideDialogWindow("x_manen_admanager_ADManager Folder List");   
+	dialog.setTitle("Select Folder");   
+	dialog.setSize(750,400);
+	dialog.setPreference("domainName", g_form.getValue('Select_Domain')); //Pass in a short description for use in the dialog
+	dialog.setPreference("selectedFolders", selectedFolders);
+	dialog.render();   
+}
+function showFolderList()
+{
+	if (($j("#FolderList").css('display') === 'none')) {
+		updateFolderList();
+		$j("#FolderList").slideDown( "slow" );
+	}
+	else
+	{
+		$j("#FolderList").slideUp( "slow" );
+	}
+}
+function updateFolderList()
+{
+	var selectedFoldersHtml = '';
+	if(folders == 0)
+	{
+		selectedFoldersHtml = '<tr><td style="padding-top: 30px;"><span style="display:block; text-align:center; margin:0 auto;">No records to display</span></td></tr>';
+	}
+
+	for(var i=0; i<folders.length;i++)
+	{
+		var escapedFolderName = (folders[i].folderName).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+		selectedFoldersHtml = selectedFoldersHtml+'<tr style="margin-left:5px;"><td style="height:20px;width:90%; ">'+escapedFolderName+'</td><td style="width:10%;"><button onclick="removeFolderFromList(this)" value="'+(folders[i].folderName)+'" type="button" id="removeButton_'+escapedFolderName+'"class="equalButton" style="padding: 0;border: none;"><img   src="xbutton.png"  width="8" height="8"></img></button></td></tr>';
+	}
+	$j("#folderListBody").html(selectedFoldersHtml);
+	$j("#folderListInput").val(folders.length>0?folders.length>1?folders[0].folderName+', ...':folders[0].folderName:'');
+
+}
+function removeFolderFromList(obj)
+{
+	for(var i=0; i<folders.length; i++)
+	{
+		if(folders[i].folderName == decodeURI($j(obj).val()))
+		{
+			folders.splice(i, 1);
+			updateFolderList();
+		}
+	}
+}
+function updateFolderForm()
+{
+	$j("#folderListInput").val(folders.length>0?folders.length>1?folders[0].folderName+', ...':folders[0].folderName:'');
+}
+function slidUpFolderList()
+{
+	$j("#FolderList").slideUp( "slow" );
+}
+function setFolders(folderList)
+{
+	folders = folderList;
+	updateFolderForm();
+}
+function setPermissions(permissionJSON)
+{
+	preSelectedPermissions = permissionJSON;
+	loadPermissionList();
+}
+function setDuration(duration)
+{
+	var selectedDurationValue = duration.duration;
+	var selectedDurationType = duration.durationType;
+	$j("#durationComponent").find("option").each(function(){
+		var optionValue = $j(this).attr('duration');
+		var durationType = $j(this).attr('durationType');
+
+		if(selectedDurationType == 'date' && selectedDurationType == durationType)
+		{
+			$j(this).prop("selected", true);
+			$j("#selectSpecificDate").show();
+			$j("#DateTime").val(selectedDurationValue.replace(/\//g, '-'));
+			$j(this).html(selectedDurationValue.replace(/\//g, '-'));
+		}
+		else if(selectedDurationType == durationType)
+		{
+			if(optionValue == optionValue)
+			{
+				$j(this).prop("selected", true);
+			}
+		}
+		
+		
+		
+		
+		if(optionValue == selectedDurationValue && durationType == duration.durationType)
+		{
+			$j(this).prop("selected", true);
+		}
+		else if(selectedDurationValue == '-1' && optionValue == selectedDurationValue) //For Specific Date and Time, Type wont match
+		{
+			$j(this).prop("selected", true);
+			$j("#selectSpecificDate").show();
+			$j("#DateTime").val(duration.durationType);
+			$j(this).html(duration.durationType);
+		}
+	});
+}
+
+function unSelectAllPermissions()
+{
+	$j('li').each(function(){
+		$j(this).find("input").prop("checked", false);
+	});
+}
+
+function getFolders()
+{
+	return folders;
+}
+
+function getPermissions()
+{
+	return permissions;
+}
+function isallfound(ele, permissionKeys)
+{
+	var allfound = false;
+	for(var j=0; j<permissionKeys.length; j++)
+	{
+		var var3 = permissionKeys[j];
+		if(var3 == ele)
+		{
+			allfound = true;
+			break;
+		}
+	}
+	return allfound;
+}
+function getPermissionKeys()
+{
+    
+	var selectedPermissions = [];
+	var result = [];
+	$j(".permissionsList").find('li').each(function(){
+		if($j(this).find("input").prop("checked")){
+			var maskId = $j(this).find("input").attr('value');
+			selectedPermissions.push(maskId);
+			result.push(maskId);
+		}
+	});
+	selectedPermissions = selectedPermissions.reverse();
+	for(var i=0; i<selectedPermissions.length; i++)
+	{
+		var found = true;
+		var var2 = onSelect[selectedPermissions[i]];
+		for(var j=0; j<var2.length; j++)
+		{			
+			found = (found && isallfound(var2[j], selectedPermissions));
+		}
+		if(found)
+		{
+			for(var k=0; k<var2.length; k++)
+			{
+				var index = result.indexOf(var2[k]);
+				if(index != -1)
+					result.splice(index, 1);
+			}
+		}
+	}
+	return result;
+}
+function getDuration()
+{
+	var type = $j("#durationComponent").find("option:selected").attr('durationType');
+	var value = $j("#durationComponent").find("option:selected").attr('duration');
+
+	var duration = {};
+	duration.duration = value;
+	duration.durationType = type;
+	if(value == '-1')
+	{
+		var durationString = $j("#DateTime").val();
+		durationString = durationString.replace(/-/g, '/');
+		duration.duration = durationString;
+	}
+	return duration;
+}
+function getDurationString()
+{
+	var durationJSON = getDuration();
+	if(durationJSON.duration == '0')
+	{
+		return "Forever";
+	}
+	else if(durationJSON.duration == '-1')
+	{
+		return durationJSON.durationType;
+	}
+	else
+	{
+		return durationJSON.duration+' '+durationJSON.durationType;
+	}
+	return '';
+}
+function removeEmptyVars()
+{
+	//TODO
+}
+function disableButtons()
+{
+	$j("#showFolderList").prop('disabled', true);
+	$j("#openFolderListPopup").prop('disabled', true);
+}
+
+
+var onSelect = {};
+var onUnSelect = {};
+var prevSelected = 1;
+function showPermissionList()
+{
+	slidUpFolderList();
+	if($j("#basic-menu").html() == "" || $j("#advanced-menu").html() == "")
+	{
+		loadPermissionList();
+		$j("#basic-menu").show();
+	}
+	else
+	{
+		switch(prevSelected)
+		{
+			case 1:
+				$j("#advanced-menu").hide();
+				$j("#basic-menu").toggle();
+				break;
+			case 2:
+				$j("#advanced-menu").toggle();
+				$j("#basic-menu").hide();
+				break;
+		}
+	}
+}
+function loadPermissionList()
+{
+	var permissionsListAjax = new GlideAjax("ADManagerFileServerHandler");
+	permissionsListAjax.addParam("sysparm_name","getPermissionList");
+	permissionsListAjax.getXMLAnswer(permissionsListResponse);
+
+	function permissionsListResponse(permissionList)
+	{		
+		var resultJSON = permissionList.evalJSON();
+		
+		var basicPermissionArray = resultJSON.basicPermissionList;
+		var advPermissionArray = resultJSON.advPermissionList;
+		onSelect = resultJSON.onSelect;
+		onUnSelect = resultJSON.onUnSelect;
+
+		var html = "";
+		html += '<ul id="basicMenuList" style="padding:1px;"><p style="color:#278efc; float:right; margin-top:-3px; margin-right:5px; cursor:pointer" onClick="togglePermissionList(this);" id="show_advanced">[Show Advanced]</p><ul style="margin-top:25px;" class="permissionsList">';
+		for(var i=0; i<basicPermissionArray.length; i++)
+		{
+			var permissionJSON = basicPermissionArray[i];
+			var permissionName = permissionJSON.ACCESS_MASK_STRING;
+			var permissionId = permissionJSON.ACCESS_MASK_ID;
+			var isSelected = isPermissionsSelected(permissionId)? 'checked':'';
+			html += '<li><input type="checkbox" name="" onclick="updateBasicPermissionList(this)" id="accessMask_'+permissionId+'" value="'+permissionId+'" '+isSelected+'><label>'+permissionName+'</label></li>';
+		}
+		html += '</ul><button href="#" type="button" onclick="donePermissionSelection();" name="done_button" id="done_permission_button" title="" class="header_button btn cat-btn btn-primary" style="float:right;margin-right:10px;" aria-label="Done" data-original-title="Done">Done</button></ul>';
+		$j("#basic-menu").html(html);
+
+		html = "";
+		html += '<ul id="advMenuList" style="padding:1px;" ><p style="color:#278efc; float:right; margin-top:10px; margin-right:5px; cursor:pointer" onClick="togglePermissionList(this);" id="show_basic">[Show Basic]</p><ul style="margin-top:25px;" class="permissionsList"><div style="float: left; width: 48%;" >';
+		for(var j=0; j<advPermissionArray.length; j++)
+		{
+			if(j != 0 && j%7 == 0)
+				html += '</div><div style="float: left; width: 48%;">';
+			var permissionJSON = advPermissionArray[j];
+			var permissionName = permissionJSON.ACCESS_MASK_STRING;
+			var permissionId = permissionJSON.ACCESS_MASK_ID;
+			var isSelected = isPermissionsSelected(permissionId)? 'checked':'';
+			html += '<li><input type="checkbox" name="" onclick="updateAdvPermissionList(this)" id="accessMask_'+permissionId+'" value="'+permissionId+'" '+isSelected+'><label>'+permissionName+'</label></li>';
+		}
+		html += '</div></ul><button href="#" type="button" onclick="donePermissionSelection();" name="done_button" id="done_permission_button" title="" class="header_button btn cat-btn btn-primary" style="float:right;margin-right:10px;" aria-label="Done" data-original-title="Done">Done</button></ul>';
+		$j("#advanced-menu").html(html);
+		
+		updatePermissionCompUI();
+	}
+}
+function togglePermissionList(element)
+{
+	if(element.id == 'show_advanced')
+	{
+		$j("#advanced-menu").show();
+		$j("#basic-menu").hide();
+		prevSelected = 2;
+	}
+	else
+	{
+		$j("#advanced-menu").hide();
+		$j("#basic-menu").show();
+		prevSelected = 1;
+	}
+}
+function hidePermissionsList()
+{
+	$j("#advanced-menu").hide();
+	$j("#basic-menu").hide();
+}
+function updateBasicPermissionList(element)
+{
+	var state = element.checked;
+	var permId = $j(element).val();
+	if(state)
+	{
+		var toSelect = onSelect[permId];
+		for(var i=0; i<toSelect.length; i++)
+		{
+			var selector = "#accessMask_"+toSelect[i];
+			$j(selector).prop("checked", true);
+		}
+	}
+	else
+	{
+		var toUnSelect = onUnSelect[permId];
+		for(var j=0; j<toUnSelect.length; j++)
+		{
+			var mask = toUnSelect[j];
+			var selector = "#accessMask_"+mask;
+			$j(selector).prop("checked", false);
+			var toUnSelectSub = onUnSelect[mask];
+			for(var k=0; k<toUnSelectSub.length; k++)
+			{
+				selector = "#accessMask_"+toUnSelectSub[k];
+				$j(selector).prop("checked", false);
+			}
+		}
+		$j("#basic-menu li input").each(function() { //iterate all listed checkbox items
+			if(this.checked){
+				var maskVal = $j(this).val();
+				var onSelectList = onSelect[maskVal];
+				for(var i=0;i<onSelectList.length;i++){
+					$j('#accessMask_'+onSelectList[i]).prop('checked',true);
+				}
+			}
+		});
+	}
+	updatePermissionCompUI();
+}
+function updateAdvPermissionList(element)
+{
+	var state = element.checked;
+	var permId = $j(element).val();
+	if(state)
+	{
+		for(var key in onSelect)
+		{
+			var value = onSelect[key];
+			if(value.length > 0)
+			{
+				var checked = true;
+				for(var i=0;i<value.length;i++)
+				{
+					if(!$j("#accessMask_"+value[i]).prop("checked"))
+					{
+						checked = false;
+						break;
+					}
+				}
+				$j("#accessMask_"+key).prop("checked", checked);
+			}
+		}
+	}
+	else
+	{
+		
+		var toUnSelect = onUnSelect[permId];
+		for(var j=0; j<toUnSelect.length; j++)
+		{
+			var selector = "#accessMask_"+toUnSelect[j];
+			$j(selector).prop("checked", false);
+		}
+		for(var key in onUnSelect)
+		{
+			var value = onUnSelect[key];
+			for(var k=0; k<value.length; k++)
+			{
+				if(value[k] == permId)
+				{
+					$j("#accessMask_"+key).prop("checked", false);
+				}
+			}
+		}	
+	}
+	updatePermissionCompUI();
+}
+function updatePermissionCompUI()
+{
+	var selectedPerms = '';
+	permissions = {};
+	$j(".permissionsList").find('li').each(function(){
+		if($j(this).find("input").prop("checked")){
+			var maskId = $j(this).find("input").attr('value'); 
+			var maskString = $j(this).find("label").text();
+			if(maskId == 2032127){
+				selectedPerms = maskString;
+				var permissionString = '{"2032127":"Full Control","1245631":"Modify","1179817":"Read and Execute","1179785":"Read","1048854":"Write","131241":"List folder contents","32":"Traverse folder/ execute file","1":"List folder/ read data","128":"Read Attributes","8":"Read Extended Attributes","2":"Create file/ write data","4":"Create folders/ append data","256":"Write Attributes","16":"Write Extended Attributes","64":"Delete sub-folders and files","65536":"Delete","131072":"Read Permissions","262144":"Write Permissions","524288":"Take Ownership"}';
+				permissions = permissionString.evalJSON();
+				return false;
+			}
+			else{
+				permissions[maskId] = maskString; 
+				if(selectedPerms != "") selectedPerms += ", ";
+				selectedPerms += $j(this).find("label").text();
+			}	
+		}
+	});
+	if(selectedPerms != '')
+	{
+		$j("#permissionLabel").html('<option hidden="hidden">'+selectedPerms+'</option>');
+	}
+	else
+	{
+		$j("#permissionLabel").html('<option hidden="hidden">Select Permissions</option>');
+	}
+}
+function donePermissionSelection()
+{
+	$j("#advanced-menu").hide();
+	$j("#basic-menu").hide();
+}
+function showDateTimePicker()
+{
+	new GwtDateTimePicker('DateTime', 'yyyy-MM-dd HH:mm:ss', true);
+}
+function updateDuration(element)
+{
+	var duration = $j(element).find("option:selected").attr('duration');
+	if(duration == "-1")
+	{
+		$j("#selectSpecificDate").show();
+		var selectedDate = $j("#DateTime").val();
+		if(selectedDate && selectedDate != '')
+		{
+			$j(element).find("option:selected").html(duration.durationType);
+		}
+	}
+	else
+	{
+		$j("#selectSpecificDate").hide();
+	}
+}
+function isPermissionsSelected(maskId)
+{
+	var isSelected = false;
+	var i=0; 
+	for(var key in preSelectedPermissions)
+	{
+		if(key == maskId)
+		{
+			isSelected = true;
+			break;
+		}
+		i++;
+	}
+	return isSelected;
+}
+function togglePermissionRow(state)
+{
+	if(state)
+		$j("#permission_row").show();
+	else
+		$j("#permission_row").hide();
+
+}
+function toggleDurationRow(state)
+{
+	if(state)
+		$j("#duration_row").show();
+	else
+		$j("#duration_row").hide();
+}]]></script>
+        <script_name>ADManagerSetPermissionsUtil</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-02-19 09:31:15</sys_created_on>
+        <sys_id>9ca1e67adb5013001de1fabdbf9619a4</sys_id>
+        <sys_mod_count>152</sys_mod_count>
+        <sys_name>x_manen_admanager.ADManagerSetPermission</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_ui_script_9ca1e67adb5013001de1fabdbf9619a4</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-03-16 10:49:20</sys_updated_on>
+        <ui_type/>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

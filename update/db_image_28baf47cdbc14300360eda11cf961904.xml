@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="db_image">
+    <db_image action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <category>general</category>
+        <format>png</format>
+        <height>15</height>
+        <image/>
+        <name>icon_clear.png</name>
+        <size_bytes>1162</size_bytes>
+        <sys_class_name>db_image</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-09-04 07:28:47</sys_created_on>
+        <sys_id>28baf47cdbc14300360eda11cf961904</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>icon_clear.png</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>db_image_28baf47cdbc14300360eda11cf961904</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-09-04 07:28:51</sys_updated_on>
+        <thumbnail/>
+        <width>15</width>
+    </db_image>
+    <sys_attachment action="INSERT_OR_UPDATE">
+        <average_image_color/>
+        <chunk_size_bytes/>
+        <compressed>true</compressed>
+        <content_type>image/png</content_type>
+        <file_name>image</file_name>
+        <image_height/>
+        <image_width/>
+        <size_bytes>1162</size_bytes>
+        <size_compressed>838</size_compressed>
+        <state/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-09-04 07:28:51</sys_created_on>
+        <sys_id>a5cabc34db054300360eda11cf96199c</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-09-04 07:28:51</sys_updated_on>
+        <table_name>ZZ_YYdb_image</table_name>
+        <table_sys_id>28baf47cdbc14300360eda11cf961904</table_sys_id>
+    </sys_attachment>
+    <sys_attachment_doc action="INSERT_OR_UPDATE">
+        <data>H4sIAAAAAAAAAA==</data>
+        <length>16</length>
+        <position>0</position>
+        <sys_attachment display_value="image" sys_id="a5cabc34db054300360eda11cf96199c">a5cabc34db054300360eda11cf96199c</sys_attachment>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-09-04 07:28:51</sys_created_on>
+        <sys_id>e5cabc34db054300360eda11cf96199c</sys_id>
+    </sys_attachment_doc>
+    <sys_attachment_doc action="INSERT_OR_UPDATE">
+        <data>nVRNbNRGFHYSUUEaCuqfaGjLyFElQPXa47XXazdLSNa7ZCt2m2627aqn2DPjrJv4J/ak60QIUU4gwQHUH4GEWjhAD4VLTwihqiKXHhKphyIVqT20Ujn0UHoADiCl43Q3IIRyYCTPzJv5vvfevB8fn6gd2No/2M9x3NbKuFln67b02/wcm9+5+cW7bHmNlpp0MnBo24oIN4oDm4CKZ02TOrHwwtxPZJjj+mK30aTN6kEDBV7GSjGZxAu5dAyPJKGFZggFNpl2/QL/z7UfeODiAv+RWpWqYZG03PHFiEwu1hpocQbpmB/ZB4YTgynwCLVA4s36sZEU+DW9BtunxyIP1iB0psD/71SzOgGKQUSAmlEFJMkQaHoGqooO4dtAlmBWhJIo6wKEhqIZMAc6g2fWIuwYdbPcscWkAt+iNDREsd1uZ9rZTBBNi1DXdVGSRVkWGEKIF3xqJYIfD3U1mCRGkRtSN/BBKlt2ME8LPN99ghdWq+uK/bgTKBYyMbFCEWYk0fPELjqmdeJsjI4bCyER6yQO5iPE8uEMPWZqY2oKZN4Y70UuS4o1awZo3iM+rZgFnt1ksIsNpCBVyWu6oNpIFhRJ1wVLUqDg6LaDHElWVFvu6nkaf0yWR0tSuZyHWQhhSctLWt4syuUc1EfLxbzZ5Vb8mFo+Il2u+4hb2pBrFCNi0SBqBMFstwomWgEN4lYQgmIR7K5ayPVTeU+ao46rJHI/JbgcBR5YC7LhPsUBSdFIzskhQScaEhRVywp5W1GEHLYQJlglGkZ8h4+fNXgic0p8onK6R6wc0+16HzBhvZOIz9onYn3ycWngQ9ZjlyvmaCO5ZT9cXR3pu3rk+Ge9+085r+64sbRkvjBe7fkDg8MnL9ZePna7d27lTHb6Tev7hb3bH/T+e/hbG598cD6aDPWd+M8PwM2yzF18f+fer0788uv+O/3Hzh1Jdp3uGRgffOPn6zeO/qXRvh2hu/TKrdUtd+Y+Kd8f2vz31BZzYNluDZ77ZqW0zfzu7O0L7qFNdy+9dLonntvUzH1eG3v+9SZY6XnrRbx8ou9LyPUOcD/eg1O/Lf/+dfp3qJRq5pWxqaP/AcmA8KyKBAAA</data>
+        <length>1104</length>
+        <position>1</position>
+        <sys_attachment display_value="image" sys_id="a5cabc34db054300360eda11cf96199c">a5cabc34db054300360eda11cf96199c</sys_attachment>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-09-04 07:28:51</sys_created_on>
+        <sys_id>29cabc34db054300360eda11cf96199c</sys_id>
+    </sys_attachment_doc>
+</record_update>

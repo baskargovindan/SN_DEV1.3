@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element label="ADManagerSUCTemplateList" max_length="40" name="x_manen_admanager_admanagersuctemplatelist" type="collection">
+        <element attributes="edge_encryption_enabled=true" label="Domain ID" max_length="40" name="domain_id" type="integer"/>
+        <element attributes="edge_encryption_enabled=true" label="isDefault" max_length="40" name="isdefault" type="boolean"/>
+        <element display="true" label="Template Display Name" max_length="255" name="template_display_name" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Template ID" max_length="40" name="template_id" type="integer"/>
+        <element label="Template Name" max_length="255" name="template_name" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Unique Id" max_length="40" name="unique_id" type="integer"/>
+    </element>
+</database>

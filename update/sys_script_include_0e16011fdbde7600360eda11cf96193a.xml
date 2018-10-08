@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_manen_admanager.ADManagerErrorHandler</api_name>
+        <client_callable>false</client_callable>
+        <description>ADManager Error Handler</description>
+        <name>ADManagerErrorHandler</name>
+        <script><![CDATA[/*
+ * ADManager Error Handler
+ */
+var ADManagerErrorHandler = Class.create();
+ADManagerErrorHandler.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+	//Error Handler
+	handleError: function(responseCode, responseBody)
+	{			
+		var responseJSON = {};
+		if(responseCode == '0') // Connection problem, Socket error & no network connection;
+		{
+			responseJSON.status = 'false';
+			responseJSON.responseCode = responseCode;
+			responseJSON.responseBody = 'Cannot connect to ADManager Plus. Possible reasons could be no network connection, wrong server name or port number, or MID server being down.';
+		}
+		else if(responseCode != '200' || responseBody == '' || responseBody == 'null')
+		{
+			responseJSON.status = 'false';
+			responseJSON.responseCode = responseCode;
+			responseJSON.responseBody = (responseBody == '' || responseBody == null)?'Cannot connect to ADManager Plus. Possible reasons could be no network connection, wrong server name or port number, or MID server being down.':responseBody;
+		}
+		else if((new global.JSON().decode(responseBody)).ERROR_CODE != null) // Got Exception from ADManager
+		{
+			var responseBodyyy = new global.JSON().decode(responseBody);
+			var statusMessage = this.getStatus(responseBodyyy.ERROR_CODE);
+			responseJSON.status = 'false';
+			responseJSON.responseCode = responseBodyyy.ERROR_CODE;
+			responseJSON.responseBody = responseBody;
+			responseJSON.statusMessage = statusMessage;
+		}
+		else if((new global.JSON().decode(responseBody)).SEVERITY != null) // Got Exception from ADManager
+		{
+			responseBody = new global.JSON().decode(responseBody);
+			responseJSON.status = 'false';
+			responseJSON.responseCode = responseBody.SEVERITY;
+			responseJSON.responseBody = responseBody.STATUS_MESSAGE;
+		}
+		else if((new global.JSON().decode(responseBody)))
+		{
+			var responseBodyy = new global.JSON().decode(responseBody);
+			if(responseBodyy[0])
+			{
+				var status = responseBodyy[0].status;
+				if(status == 'SEVERE')
+				{
+					responseJSON.status = 'false';
+					responseJSON.responseBody = responseBody;
+				}
+				else
+				{
+					responseJSON.status = 'true';
+					responseJSON.responseCode = responseCode;
+					responseJSON.responseBody =responseBody;
+				}
+			}
+			else
+			{
+				responseJSON.status = 'true';
+				responseJSON.responseCode = responseCode;
+				responseJSON.responseBody =responseBody;
+			}
+		}
+		else			
+		{
+			responseJSON.status = 'true';
+			responseJSON.responseCode = responseCode;
+			responseJSON.responseBody =responseBody;
+		}
+		return responseJSON;
+	},
+	getStatus: function(errorCode)
+	{
+		if(errorCode == '00000003')
+			return 'Product to Product Authentication Failure';
+		else
+			return 'Can\'t Process the Request';
+	},
+	type: 'ADManagerErrorHandler'
+});
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-04-28 09:50:40</sys_created_on>
+        <sys_id>0e16011fdbde7600360eda11cf96193a</sys_id>
+        <sys_mod_count>8</sys_mod_count>
+        <sys_name>ADManagerErrorHandler</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_script_include_0e16011fdbde7600360eda11cf96193a</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-03-16 10:50:37</sys_updated_on>
+    </sys_script_include>
+</record_update>

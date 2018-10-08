@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element label="ADManagerDomainDetails" max_length="40" name="x_manen_admanager_admanagerdomaindetails" type="collection">
+        <element display="true" label="Domain Flat Name" max_length="255" name="domain_flat_name" read_only="true" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Domain ID" max_length="40" name="domain_id" read_only="true" type="integer"/>
+        <element label="Domain Name" max_length="255" name="domain_name" read_only="true" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="isDefault" max_length="40" name="isdefault" read_only="true" type="boolean"/>
+    </element>
+</database>

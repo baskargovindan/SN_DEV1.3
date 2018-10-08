@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="catalog_script_client">
+    <catalog_script_client action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <applies_catalog>true</applies_catalog>
+        <applies_extended>false</applies_extended>
+        <applies_req_item>true</applies_req_item>
+        <applies_sc_task>true</applies_sc_task>
+        <applies_target_record>false</applies_target_record>
+        <applies_to>item</applies_to>
+        <cat_item display_value="Remove from Group">8ab9708fdbe88744360eda11cf9619b3</cat_item>
+        <cat_variable/>
+        <condition/>
+        <description/>
+        <field/>
+        <global>true</global>
+        <isolate_script>false</isolate_script>
+        <messages/>
+        <name>ADManagerRemoveFromGroupOnSubmit</name>
+        <order/>
+        <script><![CDATA[function onSubmit() {
+	if(getRemoveGroups().length ==0 && !isRemoveFromAllGroup())
+	{
+		alert('Please specify the group names in the categories displayed.');
+		g_form.submitted = false;
+		return false;
+	}
+
+	var loadingWindow = getDialogWindow();
+	loadingWindow.render();
+
+	g_form.clearMessages();
+
+	var usersList = getSelectedUsersList();
+	if(usersList.length == 0)
+	{
+		alert("Please select a user");
+		loadingWindow.destroy();
+		g_form.submitted = false;
+		return false;
+	}
+
+	var gURL = new GlideURL();
+	gURL.setFromCurrent();
+	var parent = gURL.getParam('parent');
+
+
+
+	if(parent && g_user.hasRole('x_manen_admanager.admanager_admin'))
+	{
+		if(parent == 'module')
+		{
+			addRemoveGroups(usersList);
+		}
+		else if(parent == 'menu')
+		{
+			addRemoveGroups(usersList);
+		}
+	}
+	else
+	{
+		var requestDetails = constructRequestDetails(usersList);
+		var incidentAjax = new GlideAjax('ADManagerIncidentHandler');
+		incidentAjax.addParam("sysparm_name","createIncident");
+		incidentAjax.addParam("requestDetails", requestDetails);
+		incidentAjax.addParam("description", "Remove the below user from the mentioned AD group(s)");
+		incidentAjax.addParam("comments", constructComments(requestDetails));
+		incidentAjax.getXMLAnswer(serverResponse);
+	}
+	function serverResponse(response)
+	{
+		loadingWindow.destroy();
+		g_form.addInfoMessage('Your request has been successfully submitted to the IT team.');
+		emptyAllFields();
+	}
+
+	function addRemoveGroups(usersList)
+	{
+		var addRemoveGroupsAJAX = new GlideAjax("ADManagerAPIUtil");
+		addRemoveGroupsAJAX.addParam("sysparm_name","addRemoveGroups");
+		addRemoveGroupsAJAX.addParam("domainName", g_form.getValue('Select_Domain'));
+		addRemoveGroupsAJAX.addParam("objectType", getObjectType());
+		//addRemoveGroupsAJAX.addParam("addGroup", JSON.stringify(getAddGroups()));
+		addRemoveGroupsAJAX.addParam("removeGroup", JSON.stringify(getRemoveGroups()));
+		//addRemoveGroupsAJAX.addParam("primaryGroup", JSON.stringify(getPrimaryGroup()));
+		addRemoveGroupsAJAX.addParam("isRemoveFromAllGroup", isRemoveFromAllGroup().toString());
+		addRemoveGroupsAJAX.addParam("inputFormat", JSON.stringify(usersList));
+		addRemoveGroupsAJAX.getXMLAnswer(addRemoveGroupsResponse);	
+
+		function addRemoveGroupsResponse(addRemoveGroupsResult)
+		{
+			addRemoveGroupsResult = addRemoveGroupsResult.evalJSON();
+			if(addRemoveGroupsResult.status == 'true')
+			{
+				var statusMessage = (addRemoveGroupsResult.responseBody).evalJSON();
+				var statusArray = [];
+				for(var i=0; i<statusMessage.length;i++)
+				{
+					var status = {};
+					status.LOGON_NAME = statusMessage[i].userPrincipalName;
+					status.sAMAccountName = statusMessage[i].sAMAccountName;
+					status.statusMessage = statusMessage[i].statusMessage;
+					statusArray.push(status);
+					var sys_id = gURL.getParam('sys_id');
+					if(sys_id != null && sys_id != '')
+					{
+						var successMsg = statusMessage[i].statusMessage;
+						if(statusMessage[i].status == '1')
+						{
+							successMsg += '\n Full Name : '+statusMessage[i].sAMAccountName+'\n memberOf : [Removed : ';
+							if(isRemoveFromAllGroup())
+							{
+								successMsg += 'Removed from all groups other than the primary group.';
+							}
+							else
+							{
+								var removeFromGroups= getRemoveGroups();
+								for(var j=0;j<removeFromGroups.length;j++)
+								{
+									if(j == 0)
+										successMsg += removeFromGroups[j].groupName;
+									else if(j == removeFromGroups.length-1)
+										successMsg += ' & '+removeFromGroups[j].groupName;
+									else
+										successMsg += ', ' + removeFromGroups[j].groupName;
+								}
+							}
+							successMsg+= ']';
+						}
+						updateComments(sys_id, successMsg);
+					}
+				}
+				updateStatus(statusArray);
+			}
+			else
+			{
+				if(addRemoveGroupsResult.statusMessage)
+					g_form.addErrorMessage(addRemoveGroupsResult.statusMessage);
+				else
+					g_form.addErrorMessage('Cannot connect to ADManager Plus. Possible reasons could be no network connection, wrong server name or port number, or MID server being down.');
+			}
+			loadingWindow.destroy();
+		}
+	}
+	g_form.submitted = false;
+	return false;
+}
+function constructRequestDetails(usersList)
+{
+	var requestDetails = {};
+	requestDetails.domainName = g_form.getValue('Select_Domain');
+	requestDetails.searchText = g_form.getValue('Name');
+	requestDetails.usersList = usersList;
+	//requestDetails.addGroup = getAddGroups();
+	requestDetails.removeGroup = getRemoveGroups();
+	requestDetails.isRemoveFromAllGroup = isRemoveFromAllGroup();
+	//requestDetails.primaryGroup = getPrimaryGroup();
+	requestDetails.objectType = getObjectType();
+	requestDetails = JSON.stringify(requestDetails);
+	return requestDetails;
+}
+function constructComments(requestDetails)
+{
+	requestDetails = requestDetails.evalJSON();
+	var comments = '[code]<ul class="sn-widget-list sn-widget-list-table">';
+
+	comments = comments+'<li class="ng-scope"><span class="sn-widget-list-table-cell">Selected Domain </span><span class="sn-widget-list-table-cell"><span class="ng-scope">'+requestDetails.domainName+'</span></span></li>';
+
+	comments = comments+'<li class="ng-scope"><span class="sn-widget-list-table-cell">Selected User </span><span class="sn-widget-list-table-cell"><span class="ng-scope">';
+
+	var userList = requestDetails.usersList;
+
+	for(var i=0; i<userList.length; i++)
+	{
+		var userName = userList[i].DISPLAY_NAME;
+		if(userName=="-")
+		{
+			userName = userList[i].userPrincipalName;
+		}
+		if(i ==0)
+			comments = comments+userName;
+		else if(i==userList.length-1)
+			comments = comments+'  &  '+userName+'.';
+		else
+			comments = comments+',  '+userName;
+	}
+	comments = comments+'</span></span></li>';
+
+// 	var addGroups = requestDetails.addGroup;
+// 	if(addGroups.length)
+// 	{
+// 		comments = comments+'<li class="ng-scope"><span class="sn-widget-list-table-cell">Add To Group(s) </span><span class="sn-widget-list-table-cell"><span class="ng-scope">';
+// 		for(var j=0; j<addGroups.length; j++)
+// 		{
+// 			if(j ==0)
+// 				comments = comments+addGroups[j].groupName;
+// 			else if(j==addGroups.length-1)
+// 				comments = comments+'  &  '+addGroups[j].groupName+'.';
+// 			else
+// 				comments = comments+',  '+addGroups[j].groupName;
+// 		}
+// 		comments = comments+'</span></span></li>';
+// 	}
+	
+	var removeGroups = requestDetails.removeGroup;
+	if(removeGroups.length >0)
+	{
+		comments = comments+'<li class="ng-scope"><span class="sn-widget-list-table-cell">Remove from Group(s) </span><span class="sn-widget-list-table-cell"><span class="ng-scope">';
+		for(var k=0; k<removeGroups.length; k++)
+		{
+			if(k ==0)
+				comments = comments+removeGroups[k].groupName;
+			else if(k==removeGroups.length-1)
+				comments = comments+'  &  '+removeGroups[k].groupName+'.';
+			else
+				comments = comments+',  '+removeGroups[k].groupName;
+		}
+		comments = comments+'</span></span></li>';
+	}
+	else if(requestDetails.isRemoveFromAllGroup)
+	{
+		comments = comments+'<li class="ng-scope"><span class="sn-widget-list-table-cell">Remove from Group(s) </span><span class="sn-widget-list-table-cell"><span class="ng-scope">Clear All Group Membership</span></span></li>';
+	}
+// 	var primaryGroup = requestDetails.primaryGroup;
+// 	if(primaryGroup.primaryGroupName)
+// 	{
+// 		comments = comments+'<li class="ng-scope"><span class="sn-widget-list-table-cell">Primary Group </span><span class="sn-widget-list-table-cell"><span class="ng-scope">'+primaryGroup.primaryGroupName+'</span></span></li>';
+// 	}
+	comments = comments+'</ul>[/code]';
+	return comments;
+}
+function updateComments(sys_id, commment)
+{
+	var incidentAjax = new GlideAjax("ADManagerIncidentHandler");
+	incidentAjax.addParam("sysparm_name","addComments");
+	incidentAjax.addParam("comments", commment);
+	incidentAjax.addParam("sys_id", sys_id);
+	incidentAjax.getXMLAnswer(serverRespose);
+	function serverRespose(response){}
+}]]></script>
+        <sys_class_name>catalog_script_client</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-08-17 10:39:13</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>12b9788fdbe88744360eda11cf96192c</sys_id>
+        <sys_mod_count>15</sys_mod_count>
+        <sys_name>ADManagerRemoveFromGroupOnSubmit</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>catalog_script_client_12b9788fdbe88744360eda11cf96192c</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-11-22 18:25:02</sys_updated_on>
+        <table/>
+        <type>onSubmit</type>
+        <ui_type>0</ui_type>
+        <variable_set/>
+        <view/>
+    </catalog_script_client>
+</record_update>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element label="ADManagerActionsList" max_length="40" name="x_manen_admanager_admanageractionslist" type="collection">
+        <element attributes="edge_encryption_enabled=true" label="Action ID" max_length="40" name="action_id" type="integer"/>
+        <element attributes="edge_encryption_enabled=true" label="Domain ID" max_length="40" name="domain_id" type="integer"/>
+        <element attributes="edge_encryption_enabled=true" label="Unique ID" max_length="40" name="unique_id" type="integer"/>
+    </element>
+</database>

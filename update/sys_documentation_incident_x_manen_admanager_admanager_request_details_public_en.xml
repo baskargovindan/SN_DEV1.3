@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_documentation element="x_manen_admanager_admanager_request_details_public" label="ADManager Request Details" language="en" table="incident">
+        <sys_documentation action="INSERT_OR_UPDATE">
+            <element>x_manen_admanager_admanager_request_details_public</element>
+            <help/>
+            <hint/>
+            <label>ADManager Request Details</label>
+            <language>en</language>
+            <name>incident</name>
+            <plural>ADManager Request Details</plural>
+            <sys_class_name>sys_documentation</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2017-10-06 06:09:09</sys_created_on>
+            <sys_id>396b558fdba9c300360eda11cf96195b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>ADManager Request Details</sys_name>
+            <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+            <sys_update_name>sys_documentation_incident_x_manen_admanager_admanager_request_details_public_en</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2017-10-06 06:09:09</sys_updated_on>
+            <url/>
+            <url_target/>
+        </sys_documentation>
+    </sys_documentation>
+</record_update>

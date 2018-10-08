@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>Remove a user from a group</description>
+        <direct>false</direct>
+        <endpoint>x_manen_admanager_Remove from Group.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<g:macro_invoke macro="DomainOnChange" />
+	<style type="text/css">
+		.button{
+		background: url(addToGroup.png) no-repeat;
+		background-size: 25px 25px;
+		cursor:pointer;
+		border: none;
+		padding:10px;
+		}
+		.equalButton{
+		padding:10px;
+		margin-left:5px;
+		}
+		.floatDiv{
+		position:relative;
+		width:24%;
+		<!-- top:66px; -->
+		left:1%;
+		height:165px;
+		border-radius: 4px;
+		}
+	</style>
+	<g:requires name="x_manen_admanager.ADManagerRemoveFromGro.jsdbx" params="cache=$[jvar_stamp]"/>
+	<tr parent_container_id="" style='padding-top:-100;'>
+		<td class="iotd"> 
+			<div class="row sc-row">
+				<div class="form-group  sc-row">
+					<div nowrap="true" class="">
+						<label class="col-xs-12 control-label">
+							<span title="" class=" required-marker" aria-label="" oclass="" mandatory="false" data-original-title="">
+							</span>
+							<img style="width:1px; margin-right:0px; margin-left:0px" src="images/s.gifx"/>
+							<span data-toggle="tooltip" class="sn-tooltip-basic " data-placement="auto" data-original-title="" title="">Remove From Group</span>
+						</label>
+					</div><div>
+					<div class="col-xs-3 form-field input_controls" id="removeFromGroupDiv">
+						<input type="text" class="cat_item_option sc-content-pad form-control" value="" maxlength="" name="removeFromGroup" id="removeFromGroupInput" disabled="disabled"/>
+
+
+					</div>
+
+
+
+					<button onclick="showRemoveFromGroupList()" type="button" class="equalButton" style="margin-left:8px;" id="editAddGroupButton">
+						<img src="icon_edit.png" width="17" height="15"/>
+					</button>
+					<button onclick="openGroupListPopup(2)" type="button" class="equalButton" style="margin-left:1px;" id="addGroupButton">
+						<img src="icon_removegroup_small.png" width="22" height="15"/>
+					</button>
+					</div>
+					<br>
+						<div class = "floatDiv" style="display:none; border: 1px solid #BDC0C4;" id="removeFromGroupList">
+							<table style="width:100%;">
+								<thead style=" width:100%; background:#E6E8EA">
+									<th style="height:20px;width:90%;">
+										Selected Groups
+									</th>
+									<th style="height:20px;width:10%;"><button onclick="showRemoveFromGroupList();" type="button" class="equalButton" style="padding: 0;border: none;background:#E6E8EA"> <img src="icon_clear.png" width="15" height="15"/></button></th>
+								</thead>
+								<tbody>
+									<tr>
+										<td colspan="2">
+											<div style="overflow:auto;height:132px">
+												<table width="100%" border="0" cellspacing="0" cellpadding="0">
+													<tbody id = "removeFromGroupListBody" style="margin:10;padding:0">
+
+													</tbody>
+												</table>
+											</div>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div>
+							<input type="checkbox" style="margin-left:20px;" id="clearAllGroupMembership" onclick="clearAllGroupMembershipClicked(this);"/>
+							<span>
+								Clear All Group Membership
+							</span>
+						</div>
+					</br>
+				</div>
+
+			</div>
+		</td>
+	</tr>
+</j:jelly>]]></html>
+        <name>Remove from Group</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-08-17 10:36:23</sys_created_on>
+        <sys_id>d028348bdbe88744360eda11cf9619e5</sys_id>
+        <sys_mod_count>10</sys_mod_count>
+        <sys_name>Remove from Group</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_ui_page_d028348bdbe88744360eda11cf9619e5</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-11-21 10:26:36</sys_updated_on>
+    </sys_ui_page>
+</record_update>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>ADManager Plus set folder permissions advanced options</description>
+        <direct>false</direct>
+        <endpoint>x_manen_admanager_ADManagerFSMAdvanced.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<style type="text/css">
+		.button{
+		background: url(addToGroup.png) no-repeat;
+		background-size: 25px 25px;
+		cursor:pointer;
+		border: none;
+		padding:10px;
+		}
+		.equalButton{
+		padding:10px;
+		margin-left:5px;
+		}
+		.floatDiv{
+		position:relative;
+		width:24%;
+		left:15px;
+		border-radius: 4px;
+		margin-bottom: 10px;
+		padding:5px;
+		}
+		li
+		{
+		list-style-type:none;
+		margin-left:-20px;
+		}
+		input[type="checkbox"] {
+		margin-top: 1px \9;
+		line-height: normal;
+		margin: 5px;
+		}
+		.tooltiptext {
+		visibility: hidden;
+		width: 220px;
+		background-color: #333;
+		color: #fff;
+		text-align: left;
+		padding: 10px 12px;
+		position: absolute;
+		z-index: 1;
+		opacity: 0;
+		transition: opacity 0.8s;
+		font-style:normal;
+		line-height:16px;
+		}
+
+
+	</style>
+
+	<g:requires name="x_manen_admanager.ADManagerFSMAdvanced.jsdbx" params="cache=$[jvar_stamp]"/>
+
+	<tr parent_container_id="" style='padding-top:-100;'>
+		<td class="iotd"> 
+			<div class="row sc-row">
+				<div class="form-group  sc-row sc-row-6">
+					<div class="col-xs-12 form-field input_controls">
+						<span class="sc-help-toggle mouse-over icon icon-vcr-right" onclick="toggleAdvancedOptions();" style="color:#004AAD;cursor:pointer;" id="advancedLink"> Advanced</span>
+					</div>
+					<div style="padding:1px;">
+						<div class = "floatDiv" style="display:none; border: 1px solid #BDC0C4;margin-top:25px;width:30%; min-width: 550px;height:150px;" id="AdvancedOptions">
+							<div>
+								<ul>
+									<li>
+										<div style="float:left">
+											<span class="input-group-radio" style="height: 32px;"><input type="radio" class="cat_item_option radio sc-radio"  id="adv_1_check" checked="checked" onclick="updateSelection(this)"/><label for="adv_1_check" class="radio-label" style="height: 32px;">Assigning permission to user directly</label></span>
+										</div>
+										<div style="float:left;">
+											<span></span>
+										</div>
+										<div style="clear:both; font-size:1px;">
+										</div>
+									</li>
+									<li>
+										<div style="float:left">
+											<span class="input-group-radio" style="height: 32px;"><input type="radio" class="cat_item_option radio sc-radio"  id="adv_2_check" onclick="updateSelection(this)"/><label for="adv_2_check" class="radio-label" style="height: 32px;">Adding the user to a group having the same permission</label></span>
+										</div>
+										<div style="float:left">
+											<span></span>
+										</div>
+										<div id="tooltip_1" style="float:left">
+											<img  style="" src="ADManager_info.png" width="15" height="15"/> 
+											<span class="tooltiptext">You can select a group having the same permissions. The specified users will be added to this group when the request is executed</span>
+										</div>
+										<div style="clear:both; font-size:1px;">
+										</div>
+										<div id="groupsWithSamePermission" style="display:none;">
+											<div class="col-xs-6 form-field input_controls">
+													<input type="text" class="cat_item_option sc-content-pad form-control" value="select group" maxlength="" name="selectSameGroup" id="selectSameGroup"  disabled="disabled"/>
+											</div>
+											<button onclick="openGroupsPopup(4)" id="" type="button" class="equalButton" style="margin-left:8px;">
+												<img src="icon_edit.png" width="17" height="15" style="margin:0px;"/>
+											</button>
+										</div>
+									</li>
+
+									<li>
+										<div style="float:left">
+											<span class="input-group-radio" style="height: 32px;"><input type="radio" class="cat_item_option radio sc-radio"  id="adv_3_check" onclick="updateSelection(this)"/><label for="adv_3_check" class="radio-label" style="height: 32px;">Adding the user to a selected group and assigning permission to that group</label></span>
+										</div>
+										<div style="float:left">
+											<span></span>
+										</div>
+										<div id="tooltip_2" style="float:left">
+											<img  style="" src="ADManager_info.png" width="15" height="15"/> 
+											<span class="tooltiptext">Users will be added to the selected group, and the specified permissions will be assigned to the group. If auto-revoke is enabled, the added users will be automatically removed from the group but the permissions assigned to the group will remain unchanged.</span>
+										</div>
+										<div style="clear:both; font-size:1px;">
+										</div>
+										<div id="allgroups" style="display:none;">
+											<div class="col-xs-6 form-field input_controls">
+													<input type="text" class="cat_item_option sc-content-pad form-control" value="select group" maxlength="" name="allGroups" id="allgroupsinput"  disabled="disabled"/>
+											</div>
+											<button onclick="openGroupsPopup(5)" id="" type="button" class="equalButton" style="margin-left:8px;">
+												<img src="icon_edit.png" width="17" height="15" style="margin:0px;"/>
+											</button>
+										</div>
+									</li>
+								</ul>
+							</div>		
+						</div>
+					</div>
+				</div>
+			</div>
+		</td>
+	</tr>
+	<script>
+		$j("#tooltip_1, #tooltip_2").hover(function(){$j(this).find("span").css('visibility', 'visible');	
+		$j(this).find("span").css('opacity', 1);
+		}, 
+		function() 
+		{
+		$j(this).find("span").css('visibility', 'hidden');
+		$j(this).find("span").css('opacity', 0);
+		});
+	</script>
+</j:jelly>
+
+]]></html>
+        <name>ADManagerFSMAdvanced</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-03-01 07:53:06</sys_created_on>
+        <sys_id>9a7ae946db6013001de1fabdbf96192c</sys_id>
+        <sys_mod_count>74</sys_mod_count>
+        <sys_name>ADManagerFSMAdvanced</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_ui_page_9a7ae946db6013001de1fabdbf96192c</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-03-06 18:20:58</sys_updated_on>
+    </sys_ui_page>
+</record_update>

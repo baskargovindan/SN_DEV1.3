@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>Set Folder Permissions</description>
+        <direct>false</direct>
+        <endpoint>x_manen_admanager_Set Folder Permissions.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<style type="text/css">
+		.button{
+			background: url(addToGroup.png) no-repeat;
+			background-size: 25px 25px;
+			cursor:pointer;
+			border: none;
+			padding:10px;
+		}
+		.equalButton{
+			padding:10px;
+			margin-left:5px;
+		}
+		.floatDiv{
+			position:relative;
+			width:24%;
+			left:15px;
+			height:220px;
+			border-radius: 4px;
+			margin-bottom: 10px;
+		}
+		li
+		{
+			list-style-type:none;
+			margin-left:-20px;
+		}
+		input[type="checkbox"] {
+			margin-top: 1px \9;
+			line-height: normal;
+			margin: 5px;
+		}
+	</style>
+	
+	<g:requires name="x_manen_admanager.ADManagerSetPermission.jsdbx" params="cache=$[jvar_stamp]"/>
+
+	<tr parent_container_id="" style='padding-top:-100;'>
+		<td class="iotd"> 
+			<div class="row sc-row">
+				<div class="form-group  sc-row">
+					<div nowrap="true" class="">
+						<label class="col-xs-12 control-label">
+							<span title="" class=" required-marker" aria-label="" oclass="" mandatory="false" data-original-title="">
+							</span>
+							<img style="width:1px; margin-right:0px; margin-left:0px" src="images/s.gifx"/>
+							<span data-toggle="tooltip" class="sn-tooltip-basic " data-placement="auto" data-original-title="" title="">Select Folder</span>
+						</label>
+					</div>
+					<div>
+						<div class="col-xs-3 form-field input_controls" style="min-width:410px;">
+							<input type="text" class="cat_item_option sc-content-pad form-control" value="" maxlength="" name="folderList" id="folderListInput"  disabled="disabled"/>
+						</div>
+						<button onclick="showFolderList()" id="showFolderList" type="button" class="equalButton" style="margin-left:8px;display:none;">
+							<img src="icon_edit.png" width="17" height="15"/>
+						</button>
+						<button onclick="openFolderListPopup(1)" id="openFolderListPopup" type="button" class="equalButton" style="margin-left:1px;">
+							<img   src="icon_addgroup_small.png"  width="22" height="15"></img>
+						</button>
+					</div>
+						<div class = "floatDiv" style="display:none; border: 1px solid #BDC0C4;min-width:400px;padding: 0px;" id="FolderList">
+							<table style="width:100%;">
+								<thead style=" width:100%; background:#E6E8EA">
+									<th style="height:20px;width:90%;">
+										Selected Folders
+									</th>
+									<th style="height:20px;width:10%;"><button onclick="showFolderList();" type="button" class="equalButton" style="padding: 0;border: none;background:#E6E8EA"> <img src="icon_clear.png" width="15" height="15"/></button></th>
+								</thead>
+								<tbody>
+									<tr>
+										<td colspan="2">
+											<div style="overflow:auto;height:132px">
+												<table width="100%" border="0" cellspacing="0" cellpadding="0">
+													<tbody id = "folderListBody" style="margin:10;padding:0">
+
+													</tbody>
+												</table>
+											</div>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+				</div>
+				<div class="form-group  sc-row" style="padding-top: 1px; margin-top: 20px;margin-bottom:10px;" id="permission_row">
+					<div nowrap="true" class="">
+						<label class="col-xs-12 control-label">
+							<span title="" class=" required-marker" aria-label="" oclass="" mandatory="false" data-original-title="">
+							</span>
+							<img style="width:1px; margin-right:0px; margin-left:0px" src="images/s.gifx"/>
+							<span data-toggle="tooltip" class="sn-tooltip-basic " data-placement="auto" data-original-title="" title="">Select Permissions</span>
+						</label>
+					</div>
+					<div>
+						<div class="col-xs-3 form-field input_controls"  onclick="showPermissionList()" style="margin-bottom:15px;min-width:410px;">
+							<select class="form-control cat_item_option" id="permissionLabel">
+								<option hidden="hidden">Select Permissions</option>
+							</select>
+						</div>
+					</div>
+						<div>
+							<div class = "floatDiv" style="display:none; border: 1px solid #BDC0C4;margin-top:55px;min-width: 400px;" id="basic-menu">
+							</div>
+							<div class = "floatDiv" style="display:none; border: 1px solid #BDC0C4;margin-top:55px;width:30%; min-width: 450px;height: 245px;" id="advanced-menu">
+							</div>
+						</div>
+				</div>
+				<div class="form-group  sc-row" id="duration_row">
+					<div nowrap="true" class="">
+						<label class="col-xs-12 control-label">
+							<span title="" class=" required-marker" aria-label="" oclass="" mandatory="false" data-original-title="">
+							</span>
+							<img style="width:1px; margin-right:0px; margin-left:0px" src="images/s.gifx"/>
+							<span data-toggle="tooltip" class="sn-tooltip-basic " data-placement="auto" data-original-title="" title="">Duration</span>
+						</label>
+					</div>
+					<div>
+						<div class="col-xs-12 form-field input_controls">
+							<div style="float:left;width:25%;min-width:410px;">
+								<select class="form-control cat_item_option"  onchange="updateDuration(this)" id="durationComponent">
+									<option duration="0" durationType="-">Forever</option>
+									<option duration="30" durationType="minutes">30 Minutes</option>
+									<option duration="1" durationType="hours">One Hour</option>
+									<option duration="2" durationType="hours">Two Hours</option>
+									<option duration="1" durationType="days">One Day</option>
+									<option duration="-1" durationType="date">A Specific Day</option>
+								</select>
+							</div>
+							<div id="selectSpecificDate" style="float:left; margin-left:1px;display:none;">
+								<button onclick="showDateTimePicker()"  type="button" class="equalButton">
+									<span class="icon-calendar icon"></span>
+								</button>
+							</div>
+							<div style="float:left;">
+								<input id="DateTime" type="text" name="DateTime" value="" style="border:none; width:0px;"/>
+							</div>
+							<div style="margin-left:15px;float:left;height:30px;line-height: 30px;">
+								<p id="selectedDateTime"></p>
+							</div>
+							<div style="clear:both; font-size:1px;">
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</td>
+	</tr>
+</j:jelly>
+
+]]></html>
+        <name>Set Folder Permissions</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-02-19 09:29:39</sys_created_on>
+        <sys_id>fd51667adb5013001de1fabdbf96192e</sys_id>
+        <sys_mod_count>137</sys_mod_count>
+        <sys_name>Set Folder Permissions</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_ui_page_fd51667adb5013001de1fabdbf96192e</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-03-21 09:19:05</sys_updated_on>
+    </sys_ui_page>
+</record_update>

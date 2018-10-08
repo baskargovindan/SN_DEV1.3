@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_macro">
+    <sys_ui_macro action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <category>general</category>
+        <description>ADMP Server Login</description>
+        <media_type/>
+        <name>ADManager Login</name>
+        <scoped_name>x_manen_admanager_ADManager Login</scoped_name>
+        <sys_class_name>sys_ui_macro</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-04-28 09:44:55</sys_created_on>
+        <sys_id>feb4495bdbde7600360eda11cf961922</sys_id>
+        <sys_mod_count>6</sys_mod_count>
+        <sys_name>ADManager Login</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_ui_macro_feb4495bdbde7600360eda11cf961922</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-10-06 07:37:14</sys_updated_on>
+        <xml><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<input type="hidden" id="canReload" value="false"/>
+	<g:evaluate var="jvar_domainList" jelly="true" object="true">  
+		var domainList = [];
+		var domainGr = new GlideRecord('x_manen_admanager_admanagerlogindomaindetails');  
+		domainGr.query();  
+		while (domainGr.next()){  
+		domainList.push(domainGr.domain_name.toString());
+		}   
+		domainList;
+	</g:evaluate>
+	<tr parent_container_id="" id="serverAuthLabel" style='padding-top:-100;'>
+
+		<td class="guide_tray">Login to ADManager Plus</td>
+	</tr>
+	<tr parent_container_id="" id="loginNameField" style='padding-top:-100;'>
+		<td class="iotd"> 
+			<div class="row sc-row">
+				<div class="form-group  sc-row">
+					<div nowrap="true" class="">
+						<label class="col-xs-12 control-label">
+							<span title="" class=" required-marker" aria-label="" oclass="" mandatory="false" data-original-title="">
+							</span>
+							<img style="width:1px; margin-right:0px; margin-left:0px" src="images/s.gifx"/>
+							<span data-toggle="tooltip" class="sn-tooltip-basic " data-placement="auto" data-original-title="" title="">Login Name</span>
+						</label>
+					</div>
+					<div class="col-xs-6 form-field input_controls">
+						<input type="text" class="cat_item_option sc-content-pad form-control" value="" maxlength="" name="loginNameInput" id="loginNameInput" />
+
+					</div>
+				</div>
+			</div>
+		</td>
+	</tr>
+	<tr parent_container_id="" id="Password_field" style='padding-top:-100;'>
+		<td class="iotd"> 
+			<div class="row sc-row">
+				<div class="form-group  sc-row">
+					<div nowrap="true" class="">
+						<label class="col-xs-12 control-label">
+							<span title="" class=" required-marker" aria-label="" oclass="" mandatory="false" data-original-title="">
+							</span>
+							<img style="width:1px; margin-right:0px; margin-left:0px" src="images/s.gifx"/>
+							<span data-toggle="tooltip" class="sn-tooltip-basic " data-placement="auto" data-original-title="" title="">Password</span>
+						</label>
+					</div>
+					<div class="col-xs-6 form-field input_controls">
+						<input type="password" class="cat_item_option sc-content-pad form-control" value="" maxlength="" name="passwordInput" id="passwordInput" onKeyPress="submitRecord(event);"/>
+
+					</div>
+				</div>
+			</div>
+		</td>
+	</tr>
+	<tr parent_container_id="" id="login_domain_select">
+		<td class="iotd">
+			<div class="row sc-row">
+				<div class="form-group  sc-row">
+					<div nowrap="true" class="" id="login_domain_select_div">
+						<label class="col-xs-12 control-label" for="login_domain_select_div">
+							<span data-toggle="tooltip" class="sn-tooltip-basic " data-placement="auto" data-original-title="" title="">Select Domain</span>
+						</label>
+					</div>
+					<div class="col-xs-6 form-field input_controls">
+						<select name="login_domain_select_box" id="login_domain_select_box" class="form-control cat_item_option">
+							<j:forEach items="${jvar_domainList}" var="jvar_domain" indexVar="jvar_idx">  
+								<option value="${jvar_domain}">${jvar_domain}</option>
+							</j:forEach> 
+						</select>
+
+
+					</div>
+				</div>
+			</div>
+		</td>
+	</tr>
+	<script>
+		function removeEmptyVars()
+		{
+		$j("#container_5411111bdb12b600360eda11cf9619e6").hide();
+		}
+		function hideLoginSection()
+		{
+		$j("#loginNameField").hide();
+		$j("#Password_field").hide();	
+		$j("#login_domain_select").hide();	
+		$j("#serverAuthLabel").hide();
+		}
+		function slideDownLoginSection()
+		{
+		//$j("#loginNameField").slideDown(400, function(){$j("#Password_field").slideDown(400, function(){$j("#login_domain_select").slideDown(400, $j("#serverAuthLabel").slideDown(400))})});
+		$j("#loginNameField").slideDown();
+		$j("#Password_field").slideDown();	
+		$j("#login_domain_select").slideDown();	
+		$j("#serverAuthLabel").slideDown();
+		}
+		function getLoginSectionVisibility()
+		{
+		return $j("#loginNameField").is(":visible");
+		}
+		function  getLoginName()
+		{
+		return 	$j("#loginNameInput").val();
+		}
+		function getPwd()
+		{
+		return 	$j("#passwordInput").val();
+		}
+		function getDomainName()
+		{ 
+		return 	$j("#login_domain_select_box").val();
+		}
+		function setLoginCredentials(login_name, password, domain_name)
+		{
+		$j("#loginNameInput").val(login_name);
+		$j("#passwordInput").val(password);
+		if(domain_name)
+		$j("#login_domain_select_box").val(domain_name);
+		}
+		function disableSeverConfigSection()
+		{
+		//TODO
+		<!-- g_form.setDisabled('isenabled', true);
+		 g_form.setDisabled('enable_service_catalog_item', true);
+		 g_form.setDisabled('server_name', true);
+		 g_form.setDisabled('server_port', true);
+		 g_form.setDisabled('protocol_settings', true); -->
+		}
+		function setCanReload(status)
+		{
+		$j("#canReload").val(status);
+		}
+		function canReload(status)
+		{
+		return $j("#canReload").val();
+		}
+
+		function checkConnection()
+		{
+		var loadingDialog = new GlideDialogWindow("dialog_loading", true);
+		loadingDialog.setPreference('table', 'loading');
+		loadingDialog.setTitle('Connecting ADManager...'); //Set the loading dialog title here...
+		if(canReload() == 'true')
+		{
+		loadingDialog.render();
+
+		var login = new GlideAjax("ADManagerAPIUtil");
+		login.addParam("sysparm_name","mobileLogin");
+		login.addParam("methodToCall",'domainList');
+		login.addParam("protocol_settings",g_form.getValue('protocol_settings'));
+		login.addParam("server_name",g_form.getValue('server_name'));
+		login.addParam("server_port",g_form.getValue('server_port'));
+		login.addParam("is_enabled",g_form.getValue('isenabled'));
+		login.addParam("enable_service_catalog_item",g_form.getValue('enable_service_catalog_item'));
+		login.addParam("useMIDServer",g_form.getValue('UseMIDServer'));
+		if(g_form.getValue('UseMIDServer') == 'true')
+		login.addParam("MIDServer", g_form.getValue('MIDServer'));
+		else 
+		login.addParam("MIDServer",'');
+		login.addParam('username', '');
+		login.addParam('pwd', '');
+		login.addParam('domainName', '');
+		login.getXMLAnswer(loginResponse);	
+
+
+		}
+		else
+		{
+		loadingDialog.destroy();
+		}
+		function loginResponse(response)
+		{
+		loadingDialog.destroy();
+		response = response.evalJSON();
+		if(response.status =='true')
+		{
+		disableSeverConfigSection();
+		slideDownLoginSection();
+		setLoginCredentials('', '');
+		}
+		else
+		{
+		hideLoginSection();
+		}
+		}
+		}
+		function setDomainList(domainList)
+		{
+		$j("#login_domain_select_box").html(domainList);
+		}
+		function submitRecord(event)
+		{
+		if(event &amp;&amp; (event.keyCode== 13 || event.which == 13)) saveProducer('');
+		}
+	</script>
+
+</j:jelly>]]></xml>
+    </sys_ui_macro>
+</record_update>

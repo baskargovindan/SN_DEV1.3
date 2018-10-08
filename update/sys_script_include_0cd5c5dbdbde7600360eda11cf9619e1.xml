@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_manen_admanager.ADManagerAuthHandler</api_name>
+        <client_callable>false</client_callable>
+        <description>ADManager AuthObject Handler</description>
+        <name>ADManagerAuthHandler</name>
+        <script><![CDATA[/*
+ * ADManager Auth Object Handler
+ */
+var ADManagerAuthHandler = Class.create();
+ADManagerAuthHandler.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+	// Store ADManager auth in DB
+	handleResponse: function(response)
+	{
+		this.removeAuth(); // remove previous details;
+		var authObject =  new global.JSON().decode(response);
+		var authTicket = authObject.AuthTicket;
+		var loginName = authObject.LoginName;
+		var loginId = authObject.LoginId;
+		var loginStatus = authObject.LoginStatus;
+		var validDate = authObject.ValidDate;
+		var loginStatusMessage = authObject.LoginStatusMessage;
+		this.storeAuth(authTicket, loginName, loginId, loginStatus, validDate, loginStatusMessage);
+		
+		var admpAuthObject = new global.JSON().decode(authObject.AdmpAuthObject);
+
+		new ADManagerDomainListMgmtHandler().addDomainList(admpAuthObject.domainNameList); // store domain details
+		new ADManagerActionHandler().addActionList(admpAuthObject.domainsVsActionList); // store action details
+	},
+	///remove all previous record from DB.
+	removeAuth: function()
+	{
+		var gr = new GlideRecord('x_manen_admanager_admanagerauthobject');
+		gr.deleteMultiple();
+	},
+	// Add a new entry in DB which received data.
+	storeAuth:function(authTicket, loginName, loginId, loginStatus, validDate, loginStatusMessage)
+	{
+		var authRecord = new GlideRecord('x_manen_admanager_admanagerauthobject');
+		authRecord.initialize(); 
+		authRecord.authtoken = authTicket;
+		authRecord.loginname = loginName;
+		authRecord.login_id = loginId;
+		authRecord.login_status = loginStatus;
+		authRecord.validdate = validDate;
+		authRecord.login_status_message	 = loginStatusMessage;
+		authRecord.insert();
+	},
+	// Return the authtoken present in DB.
+	getAuthToken: function()
+	{
+		var authRecord = new GlideRecord('x_manen_admanager_admanagerauthobject');
+		authRecord.query();
+		var authToken = '';
+		if (authRecord.next()) { 
+			 authToken = authRecord.authtoken;
+		}
+		return authToken;
+	},
+    type: 'ADManagerAuthHandler'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-04-28 09:49:32</sys_created_on>
+        <sys_id>0cd5c5dbdbde7600360eda11cf9619e1</sys_id>
+        <sys_mod_count>5</sys_mod_count>
+        <sys_name>ADManagerAuthHandler</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_script_include_0cd5c5dbdbde7600360eda11cf9619e1</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-10-06 07:39:44</sys_updated_on>
+    </sys_script_include>
+</record_update>

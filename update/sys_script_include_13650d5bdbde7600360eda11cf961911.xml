@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_manen_admanager. ADManagerDomainListHandler</api_name>
+        <client_callable>true</client_callable>
+        <description>ADManager DomainListHandler</description>
+        <name> ADManagerDomainListHandler</name>
+        <script><![CDATA[/*
+ *Domain List Handler  
+ */
+var ADManagerDomainListHandler = Class.create();
+ADManagerDomainListHandler.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+	// get domain_unique_id for a domain_name;
+	getDomainId: function(domainName)
+	{
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerdomaindetails');
+		detailsRecord.addQuery('domain_name', domainName);
+		detailsRecord.query();
+		var domain_id = 0; // dummy data
+		if (detailsRecord.next()) { 
+			 domain_id = detailsRecord.domain_id;
+		}
+		return domain_id;
+	},
+	// get sys_id of a domain record with domain_name.
+	getSysIdforDomain: function(domainName)
+	{
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerlogindomaindetails');
+		detailsRecord.addQuery('domain_name', domainName);
+		detailsRecord.query();
+		var sys_id = -1; // dummy data
+		if (detailsRecord.next()) { 
+			 sys_id = detailsRecord.sys_id;
+		}
+		return sys_id;
+	},
+	// get domain name from a record with sys_id
+	getdomainNameforSysId: function(sys_id)
+	{
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerlogindomaindetails');
+		detailsRecord.addQuery('sys_id', sys_id);
+		detailsRecord.query();
+		var domainName = ''; 
+		if (detailsRecord.next()) { 
+			 domainName = detailsRecord.domain_name.toString();
+		}
+		return domainName;
+	},
+	// Get Default Domain Name.
+	getDefaultDomain: function()
+	{
+		var domainName = '';
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerdomaindetails');
+		detailsRecord.addQuery('isdefault', 'true');
+		detailsRecord.query();
+		if (detailsRecord.next()) { 
+			 domainName = detailsRecord.domain_name;
+		}
+		return domainName;
+	},
+	// get all record from admanager domain details table.
+	getDomainList: function(action_id)
+	{
+		if(!action_id)
+		    action_id = this.getParameter('action_id');
+		var domainList = [];
+		var authorizedDomainList = this.getAuthorizedDomainList(action_id);
+		authorizedDomainList = authorizedDomainList.join();
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerdomaindetails');
+		detailsRecord.addQuery('domain_id', 'IN', authorizedDomainList);
+		detailsRecord.query();
+
+		if(!(new ADManagerServerDetails().isServerConfigured()) || detailsRecord.getRowCount() ==0) // To check whether the server is configured or not. If no, then throw a errror response.
+		{
+			var requestDetails  = {};
+			requestDetails.status = 'false';
+			requestDetails.responseBody = 'Please configure ADManager server or Contact you administrator for more details.';
+			return new global.JSON().encode(requestDetails);
+		}
+		else if(!(new ADManagerCommonUtil().checkServerCompatibility()))
+		{
+			var requestDetails  = {};
+			requestDetails.status = 'false';
+			requestDetails.responseBody = 'To use this feature, upgrade ADManager Plus server to 6591 or later versions. Contact support@admanagerplus.com to upgrade.';
+			return new global.JSON().encode(requestDetails);
+		}
+		
+		while(detailsRecord.next()) { 
+			var domainDetails = {};
+			domainDetails.domainName = detailsRecord.domain_name.toString();
+			domainDetails.domainId = detailsRecord.domain_id.toString();
+			domainDetails.isDefault = detailsRecord.isdefault.toString();
+			domainList.push(domainDetails);
+		}
+		return new global.JSON().encode(domainList); // JSON Array --> JSON String.
+	},
+	getLoginDomainList: function ()
+	{
+		var domainList = [];
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerlogindomaindetails');
+		detailsRecord.query();
+		while(detailsRecord.next()) { 
+			var domainDetails = {};
+			domainDetails.domainName = detailsRecord.domain_name.toString();
+			domainList.push(domainDetails);
+		}
+		return new global.JSON().encode(domainList); // JSON Array --> JSON String.
+	},
+	getAuthorizedDomainList: function(action_id)
+	{
+			return new ADManagerActionHandler().getDomainIdforAction(action_id);
+	},
+    type: 'ADManagerDomainListHandler'
+});
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-04-28 09:47:59</sys_created_on>
+        <sys_id>13650d5bdbde7600360eda11cf961911</sys_id>
+        <sys_mod_count>6</sys_mod_count>
+        <sys_name> ADManagerDomainListHandler</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_script_include_13650d5bdbde7600360eda11cf961911</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-10-06 07:39:53</sys_updated_on>
+    </sys_script_include>
+</record_update>

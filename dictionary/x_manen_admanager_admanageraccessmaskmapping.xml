@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element label="ADManagerAccessMaskMapping" max_length="40" name="x_manen_admanager_admanageraccessmaskmapping" type="collection">
+        <element attributes="edge_encryption_enabled=true" label="ACCESS_MASK_ID" max_length="40" name="access_mask_id" type="integer"/>
+        <element attributes="edge_encryption_enabled=true" label="CHILD_ACCESS_MASK" max_length="40" name="child_access_mask" type="integer"/>
+        <element attributes="edge_encryption_enabled=true" display="true" label="MAPPING_TYPE" max_length="40" name="mapping_type" type="integer"/>
+    </element>
+</database>

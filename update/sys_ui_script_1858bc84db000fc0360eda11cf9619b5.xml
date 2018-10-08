@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>ADManager UserList Common client Scripts</description>
+        <global>false</global>
+        <name>x_manen_admanager.ADManagerUserListUtil</name>
+        <script><![CDATA[var selectedUserList = [];
+function loadUserList(userListJSON, selectAll, dialogWindow)
+{
+	userListJSON = userListJSON.evalJSON(); 
+	$j('#start_index').html(userListJSON.startIndex);
+	$j('#end_index').html(userListJSON.endIndex);
+	$j('#total_count').html(userListJSON.count);
+	var UsersList = userListJSON.UsersList;
+
+	var headerHtml = '<th style=" padding: 0 2px 5px; vertical-align:middle; white-space:nowrap" align="center" class=" col-control" scope="col"></th><th style="; vertical-align:middle; white-space:nowrap" align="center" class=" col-control" scope="col"><span> Display Name</span></th><th style="; vertical-align:middle; white-space:nowrap" align="center" class=" col-control" scope="col"><span> Logon Name</span></th><th style="; vertical-align:middle; white-space:nowrap" align="center" class=" col-control" scope="col"><span> Distinguished Name</span></th><th style="; vertical-align:middle; white-space:nowrap" align="center" class=" col-control" scope="col"><span> OU Name</span></th>';
+	$j('#ADUserListHeader').html(headerHtml);
+
+	var html = '';
+	if(UsersList.length > 0)
+	{
+		for(var i=0; i<UsersList.length; i++)
+		{
+			var displayName = UsersList[i].DISPLAY_NAME?UsersList[i].DISPLAY_NAME:'-';
+
+			var logonName = UsersList[i].LOGON_NAME?UsersList[i].LOGON_NAME:'-';
+			if(logonName == '-')
+				logonName = UsersList[i].userPrincipalName?UsersList[i].userPrincipalName:'-';
+
+			var distinguishedName = UsersList[i].DISTINGUISHED_NAME?UsersList[i].DISTINGUISHED_NAME:'-';
+			if(distinguishedName == '-')
+				distinguishedName = UsersList[i].distinguishedName?UsersList[i].distinguishedName:'-';
+
+			var ouName = UsersList[i].OU_NAME?UsersList[i].OU_NAME:'-';
+			var sid = UsersList[i].SID_STRING?UsersList[i].SID_STRING:UsersList[i].objectSID;
+			var sAMAccountName = UsersList[i].SAM_ACCOUNT_NAME?UsersList[i].SAM_ACCOUNT_NAME:UsersList[i].sAMAccountName;
+			var objectGUID = UsersList[i].OBJECT_GUID?UsersList[i].OBJECT_GUID:UsersList[i].objectGUID;
+			var isChecked = (selectAll || isUserSelected(objectGUID))?'checked' : '';
+
+			if(i%2==1)
+				html = html+'<tr class="list_row list_odd">';
+			else
+				html = html+'<tr class="list_row list_even">';
+
+			html = html+'<td style="white-space:nowrap;" class="list_decoration_cell col-control col-small col-center " rowspan="1" scope="row"><span class="input-group-radio"><input data-logon_name = "'+encodeURI(logonName)+'" data-samaccountname = "'+encodeURI(sAMAccountName)+'" data-sid = "'+sid+'" data-distinguishedname = "'+encodeURI(distinguishedName)+'" data-displayname = "'+encodeURI(displayName)+'" data-ouname = "'+encodeURI(ouName)+'" name="check_aduser" id="check_aduserlist_'+objectGUID+'" data-type="list2_checkbox" type="radio" class="radio "  value = '+objectGUID+' '+isChecked+'  onclick="selectUser(this);"></input><label for="check_aduserlist_'+objectGUID+'" class="radio-label" style=""></label></span></td>';
+
+			html = html+'<td class="vt vt-spacer" style="padding: 0">'+displayName+'</td><td class="vt vt-spacer" style="padding: 0">'+logonName+'</td><td class="vt vt-spacer" style="padding: 0">'+distinguishedName+'</td><td class="vt vt-spacer" style="padding: 0">'+ouName+'</td></tr>'; 
+		}
+		showSubmitButton();
+	}
+	else
+	{
+		$j('#start_index').html(0);
+		html = html+'<tr class="list2_no_records"><td colspan="99">No records to display</td></tr>';
+		hideSubmitButton();
+	}
+
+	$j("#ADUserListBody").html(html);
+	showUsersList(); 
+	if(dialogWindow)
+		dialogWindow.destroy();
+}
+
+function hideUsersList()
+{
+	$j("#ADUserList").hide();
+}
+function showUsersList()
+{
+	$j("#ADUserList").show();
+}
+
+function navigateFirst()
+{
+	var StartIndex = parseInt($j('#start_index').html());
+	if(StartIndex>20)
+		searchUsers(1, 20);
+}
+function navigateBack()
+{
+	var total_count = parseInt($j('#total_count').html());
+	var StartIndex = parseInt($j('#start_index').html());
+
+	if(StartIndex-20>=1)
+		searchUsers(StartIndex-20, 20);
+}
+function navigateNext()
+{
+	var total_count = parseInt($j('#total_count').html());
+	var StartIndex = parseInt($j('#start_index').html());
+
+	if(StartIndex+20<total_count)
+		searchUsers(StartIndex+20, 20);
+}
+function navigateLast()
+{
+	var total_count = parseInt($j('#total_count').html());
+	var StartIndex = parseInt($j('#start_index').html());
+
+	if(StartIndex+20<total_count)
+	{
+		var startIndex = 1;
+		if(total_count%20 ==0)
+			startIndex = total_count-19;
+		else
+			startIndex = total_count-(total_count%20)+1;
+		searchUsers(startIndex, 20);
+	}
+
+}
+
+function selectUser(element)
+{
+	var checkBoxCheckedStatus = $j(element).prop("checked");
+	if(checkBoxCheckedStatus)
+		addUser(element);
+	else
+		removeUser(element);
+}
+
+function addUser(element)
+{
+	selectedUserList.splice(0, 1); // Currently one user at a time 
+	var userDetails = {};
+	userDetails.DISPLAY_NAME = decodeURI($j(element).data('displayname'));
+	userDetails.userPrincipalName = decodeURI($j(element).data('logon_name'));
+	userDetails.sAMAccountName = decodeURI($j(element).data('samaccountname'));
+	userDetails.objectSID = $j(element).data('sid');
+	userDetails.distinguishedName = decodeURI($j(element).data('distinguishedname'));
+	userDetails.objectGUID = element.value;
+	userDetails.OU_NAME = decodeURI($j(element).data('ouname'));
+	selectedUserList.push(userDetails);
+}
+function removeUser(element)
+{
+	for(var i=0; i<selectedUserList.length; i++)
+	{
+		if(selectedUserList[i].objectGUID == element.value)
+			selectedUserList.splice(i, 1);
+	}
+}
+function isUserSelected(guid)
+{	
+	for(var i=0; i<selectedUserList.length; i++)
+	{
+		if(selectedUserList[i].objectGUID == guid)
+			return true;
+	}
+	return false;
+}
+function getSelectedUsersList()
+{
+	return selectedUserList;
+}
+function setSelectedUsersList(usersList)
+{
+	selectedUserList = usersList;
+}
+function updateStatus(statusArray)
+{
+	var headerHtml = '<th style="; vertical-align:middle; white-space:nowrap" align="center" class=" col-control" scope="col"><span>sAMAccountName</span></th><th style="; vertical-align:middle; white-space:nowrap" align="center" class=" col-control" scope="col"><span> Logon Name</span></th><th style="; vertical-align:middle; white-space:nowrap" align="center" class=" col-control" scope="col"><span>Status Message</span></th>';
+	hideSubmitButton();
+	var count = statusArray.length;
+	$j("#ADUserListHeader").html(headerHtml);
+	$j('#start_index').html(1);
+	$j('#end_index').html(count);
+	$j('#total_count').html(count);
+
+	var html = '';
+	for(var i=0; i<count; i++)
+	{
+		var logonName = statusArray[i].LOGON_NAME?statusArray[i].LOGON_NAME:'-';
+		var sAMAccountName = statusArray[i].sAMAccountName?statusArray[i].sAMAccountName:'-';
+		var statusMessage = statusArray[i].statusMessage?statusArray[i].statusMessage:'-';
+		if(i%2==1)
+			html = html+'<tr class="list_row list_odd" style="height=20px;">';
+		else
+			html = html+'<tr class="list_row list_even">';
+
+		html = html+'<td class="vt vt-spacer" style="padding: 0">'+sAMAccountName+'</td><td class="vt vt-spacer" style="padding: 0">'+logonName+'</td><td class="vt vt-spacer" style="padding: 0">'+statusMessage+'</td></tr>'; 
+	}
+
+	$j("#ADUserListBody").html(html);
+}
+function isADUserListVisible()
+{
+	if (($j("#ADUserList").css('display') === 'none')) 
+		return false;
+	else
+		return true;
+}
+function emptyAllFields()
+{
+	hideUsersList();
+	hideSubmitButton();
+	g_form.setValue('Name', '');
+	if($j.isFunction(window['setAddGroups']))
+		setAddGroups([]);
+	if($j.isFunction(window['setRemoveGroups']))
+		setRemoveGroups([]);
+	if($j.isFunction(window['setPrimaryGroup']))
+		setPrimaryGroup({});
+	if($j.isFunction(window['toggleRemoveGroupsField']))
+		{
+			$j("#clearAllGroupMembership").prop('checked', false);
+			toggleRemoveGroupsField(false);
+		}
+	if ($j("#password"))
+		$j("#password").val('');
+	if ($j("#password_re_type"))
+		$j("#password_re_type").val('');
+	if ($j("#password_error_box"))
+		$j("#password_error_box").hide();
+	if($j.isFunction(window['slidUpGroupsList']))
+		slidUpGroupsList();
+
+/*
+	if($j.isFunction(window['setFolders']))
+		setFolders([]);
+	if($j.isFunction(window['setPermissions']))
+		setPermissions({});
+
+	var duration = {};
+	duration.duration = '0';
+	duration.durationType = 'Forever';
+	if($j.isFunction(window['setDuration']))
+		setDuration(duration);
+*/	
+	if($j.isFunction(window['updateActionDetails']))
+		updateActionDetails(1, '', '');
+
+	if($j.isFunction(window['slidUpFolderList']))
+		slidUpFolderList();
+	if($j.isFunction(window['hidePermissionsList']))
+		hidePermissionsList();
+
+}
+function getDialogWindow()
+{
+	var loadingDialog = new GlideDialogWindow("dialog_loading", true);
+	loadingDialog.setPreference('table', 'loading');
+	loadingDialog.setTitle('Connecting ADManager...'); //Set the loading dialog title here...
+	return loadingDialog;
+}
+function setSelectedDomainOption(element, domainName)
+{
+	$j(element).val(domainName);
+}
+function isFormFilled()
+{
+	if(g_form.getValue('Name') && g_form.getValue('Name') != '')
+		return true;
+	else if ($j("#password") && $j("#password").val() != '' && $j("#password").val()!=undefined)
+		return true;
+	else if ($j("#password_re_type") && $j("#password_re_type").val() != '' && $j("#password_re_type").val()!=undefined)
+		return true;
+	else if($j.isFunction(window['getAddGroups']) && getAddGroups().length > 0)
+			return true;
+	else if($j.isFunction(window['getRemoveGroups']) && getRemoveGroups().length > 0)
+		return true;
+	else if($j.isFunction(window['getPrimaryGroup']) && getPrimaryGroup().primaryGroupName != null)
+		return true;
+	else if ($j("#clearAllGroupMembership") && $j("#clearAllGroupMembership").prop("checked"))
+		return true;
+	else if($j.isFunction(window['isADUserListVisible']) && isADUserListVisible())
+		return true;
+	else 
+		return false;
+}]]></script>
+        <script_name>ADManagerUserListUtil</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-07-14 06:23:23</sys_created_on>
+        <sys_id>1858bc84db000fc0360eda11cf9619b5</sys_id>
+        <sys_mod_count>7</sys_mod_count>
+        <sys_name>x_manen_admanager.ADManagerUserListUtil</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_ui_script_1858bc84db000fc0360eda11cf9619b5</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-03-21 09:37:23</sys_updated_on>
+        <ui_type/>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

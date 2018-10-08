@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_manen_admanager.ADManagerManagersListHandler</api_name>
+        <client_callable>true</client_callable>
+        <description>ADManager ManagersList Handler</description>
+        <name>ADManagerManagersListHandler</name>
+        <script><![CDATA[var ADManagerManagersListHandler = Class.create();
+ADManagerManagersListHandler.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+	getManagersList: function()
+	{
+		var resultJSON = {};
+		var searchText = this.getParameter('searchText');
+		var domainName = this.getParameter('domainName');
+		var startIndex = this.getParameter('startIndex');
+		var range = this.getParameter('range');
+		var responseJSON = this.doPost(domainName, searchText, startIndex, range);
+		responseJSON = new global.JSON().decode(responseJSON);
+		
+		if(responseJSON.status == 'true')
+		{
+			var managerListJSON =  new global.JSON().decode(responseJSON.responseBody);
+			var count = managerListJSON.MANAGER_COUNT;
+			var managerList = managerListJSON.MANAGER_LIST;
+			
+			resultJSON.count = count;
+			resultJSON.startIndex = startIndex;
+			var endIndex = parseInt(startIndex)+parseInt(range)-1;
+			resultJSON.endIndex = (endIndex<=count)?endIndex:count;
+			resultJSON.ManagersList = managerList;
+			resultJSON.status = 'true';
+		} 
+		else
+		{
+			gs.addErrorMessage(responseJSON.responseBody);
+		}
+		return new global.JSON().encode(resultJSON);
+	},
+	/* Fetch Managers List from ADManager
+	 * Params : domainName, searchText, startIndex, range;
+	 */
+	doPost: function(domainName, searchText, startIndex, range)
+	{
+		var requestBody, responseBody, responseCode, sm;
+		var responseJSON = {};
+
+		var authHandler = new ADManagerAuthHandler();
+		var serverHandler = new ADManagerServerDetails();
+
+		var authToken = authHandler.getAuthToken();
+		if(authToken == '')// If Authtoken not present in DB.
+		{
+			responseJSON.responseBody = 'ADManager is not yet authenticated. Please login with valid credentials.';
+			responseJSON.status = 'false';
+			return new global.JSON().encode(responseJSON);
+		}
+		var url = serverHandler.getURL();	
+		try{
+			sm = new sn_ws.RESTMessageV2("ADManagerGetManagersList", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+			sm.setStringParameter('AuthToken', authToken);  
+			sm.setStringParameter('url', url);
+			sm.setStringParameter('domainName', domainName);
+			sm.setStringParameterNoEscape('searchText', searchText);
+			sm.setStringParameter('FROM_INDEX', startIndex);
+			sm.setStringParameter('RANGE', range);
+			sm.setHttpTimeout(10000); //In milliseconds. Wait at most 10 seconds for response from http request.
+			response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+		return new global.JSON().encode(responseJSON); // JSON Object --> JSON String;
+	},
+    type: 'ADManagerManagersListHandler'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-07-13 13:40:12</sys_created_on>
+        <sys_id>ee63d177dbfbfac0360eda11cf961968</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>ADManagerManagersListHandler</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_script_include_ee63d177dbfbfac0360eda11cf961968</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-11-22 18:17:18</sys_updated_on>
+    </sys_script_include>
+</record_update>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl_role">
+    <sys_security_acl_role action="INSERT_OR_UPDATE">
+        <sys_class_name>sys_security_acl_role</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-04-28 09:14:06</sys_created_on>
+        <sys_id>9dcd7413dbde7600360eda11cf961933</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_manen_admanager_admanagerauthobject.x_manen_admanager_admanagerauthobject_user</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_security_acl display_value="x_manen_admanager_admanagerauthobject">15cd7413dbde7600360eda11cf961932</sys_security_acl>
+        <sys_update_name>sys_security_acl_role_9dcd7413dbde7600360eda11cf961933</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-04-28 09:14:06</sys_updated_on>
+        <sys_user_role display_value="x_manen_admanager_admanagerauthobject_user" name="x_manen_admanager_admanagerauthobject_user">91cd7413dbde7600360eda11cf96192e</sys_user_role>
+        <transaction_id/>
+    </sys_security_acl_role>
+</record_update>

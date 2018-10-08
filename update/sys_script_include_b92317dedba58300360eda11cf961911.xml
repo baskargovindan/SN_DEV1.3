@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_manen_admanager. ADManagerDomainListMgmtHandler</api_name>
+        <client_callable>false</client_callable>
+        <description/>
+        <name> ADManagerDomainListMgmtHandler</name>
+        <script><![CDATA[var  ADManagerDomainListMgmtHandler = Class.create();
+ADManagerDomainListMgmtHandler.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+	// To insert the list of Login domain list. (Including ADManager Plus Authentication)
+	insertLoginDomainList:function(domainVsFlatName)
+	{
+		var gr = new GlideRecord('x_manen_admanager_admanagerlogindomaindetails');
+		gr.deleteMultiple(); // To delete all previous entries;
+		domainVsFlatName = new global.JSON().decode(domainVsFlatName); // JSONString to JSON Object;
+		var i=0; // for domain unique id;
+		for(var domainName in domainVsFlatName){
+			var domain_flat_name = domainVsFlatName[domainName];
+			var domainRecord = new GlideRecord('x_manen_admanager_admanagerlogindomaindetails');
+			domainRecord.initialize(); // initialize a new row with empty data
+			domainRecord.domain_id = ++i;
+			domainRecord.domain_name = domainName; 
+			domainRecord.domain_flat_name = domain_flat_name; 
+			domainRecord.insert(); // insert given values.
+		}
+	},
+	//To add list of domains configured in ADManager 
+	addDomainList: function(domainList)
+	{
+		this.removeEntries(); //To delete all previous entries;
+		for(var i=0;i<domainList.length;i++)
+		{
+			var domainRecord = new GlideRecord('x_manen_admanager_admanagerdomaindetails');
+			domainRecord.initialize(); // initialize a new row with empty data
+			domainRecord.domain_id = i+1;
+			domainRecord.domain_name = domainList[i].DOMAIN_NAME; 
+			domainRecord.domain_flat_name = domainList[i].DOMAIN_FLAT_NAME; 
+			domainRecord.isdefault = domainList[i].IS_DEFAULT_DOMAIN;
+			domainRecord.insert();
+		}
+		this.addLoginDomainList(domainList);
+	},
+
+	//Add Login DomainList
+	addLoginDomainList:function(domainList)
+	{
+		var gr = new GlideRecord('x_manen_admanager_admanagerlogindomaindetails');
+		gr.deleteMultiple(); // To delete all previous entries;
+		
+		//Adding ADManager Plus Authentication
+		var domainRecord = new GlideRecord('x_manen_admanager_admanagerlogindomaindetails');
+		domainRecord.initialize(); // initialize a new row with empty data
+		domainRecord.domain_name = 'ADManager Plus Authentication'; 
+		domainRecord.domain_flat_name = 'ADManager Plus Authentication'; 
+		domainRecord.insert();
+		
+		for(var i=0;i<domainList.length;i++)
+		{
+			domainRecord = new GlideRecord('x_manen_admanager_admanagerlogindomaindetails');
+			domainRecord.initialize(); // initialize a new row with empty data
+			domainRecord.domain_name = domainList[i].DOMAIN_NAME; 
+			domainRecord.domain_flat_name = domainList[i].DOMAIN_FLAT_NAME; 
+			domainRecord.insert();
+		}
+	},
+
+	// Remove all records from admpdomainDetails table.
+	removeEntries:function()
+	{
+	var gr = new GlideRecord('x_manen_admanager_admanagerdomaindetails');
+	gr.deleteMultiple(); // Delete all records that matches the criteria.
+},
+																type: ' ADManagerDomainListMgmtHandler'
+																});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-10-04 06:57:46</sys_created_on>
+        <sys_id>b92317dedba58300360eda11cf961911</sys_id>
+        <sys_mod_count>5</sys_mod_count>
+        <sys_name> ADManagerDomainListMgmtHandler</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_script_include_b92317dedba58300360eda11cf961911</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-03-13 13:29:28</sys_updated_on>
+    </sys_script_include>
+</record_update>

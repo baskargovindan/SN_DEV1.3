@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_manen_admanager.ADManagerHSKeyAuthenticator</api_name>
+        <client_callable>false</client_callable>
+        <description>ADManager HSKey Authenticator</description>
+        <name>ADManagerHSKeyAuthenticator</name>
+        <script><![CDATA[var ADManagerHSKeyAuthenticator = Class.create();
+ADManagerHSKeyAuthenticator.prototype = {
+	initialize: function() {
+	},
+	getHSKey: function(isRefresh)
+	{
+		if(isRefresh)
+			return this.generateHSKey();
+		var hsKey = '';
+		var generatedTime = '';
+		var hsKeyRecord = new GlideRecord('x_manen_admanager_admanagerhskey');
+		hsKeyRecord.query();
+		if(hsKeyRecord.next())
+		{
+			hsKey = hsKeyRecord.hskey;
+			generatedTime = hsKeyRecord.generated_datetime;
+		}
+		if(!hsKey || hsKey == '')
+			return this.generateHSKey();
+		
+		var generatedTimeRecorded = new GlideDateTime(generatedTime);
+		generatedTimeRecorded.addSeconds(120);//Every 2 mins change the key
+		var timeNow = new GlideDateTime();
+		if(generatedTimeRecorded.compareTo(timeNow) == -1)
+			return this.generateHSKey();
+		else
+			return hsKey;
+	},
+	generateHSKey: function()
+	{
+		var hsKey = gs.generateGUID();
+		var generatedTime = new GlideDateTime(); 
+		var hsKeyRecord = new GlideRecord('x_manen_admanager_admanagerhskey');
+		hsKeyRecord.query();
+		if(hsKeyRecord.next())
+		{
+			hsKeyRecord.hskey = hsKey;
+			hsKeyRecord.generated_datetime = generatedTime.toString();
+			hsKeyRecord.update();
+		}
+		else
+		{
+			hsKeyRecord.initialize();
+			hsKeyRecord.hskey = hsKey;
+			hsKeyRecord.generated_datetime = generatedTime.toString();
+			hsKeyRecord.insert();
+		}
+		return hsKey;
+	},
+	validateHSKey: function(key)
+	{
+		var hsKey = this.getHSKey(false);
+		if(hsKey == key)
+			return true;
+		else
+			return false;
+	},
+	type: 'ADManagerHSKeyAuthenticator'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-07-13 13:38:03</sys_created_on>
+        <sys_id>bbd2d577dbfbfac0360eda11cf96190b</sys_id>
+        <sys_mod_count>11</sys_mod_count>
+        <sys_name>ADManagerHSKeyAuthenticator</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_script_include_bbd2d577dbfbfac0360eda11cf96190b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-10-06 07:39:37</sys_updated_on>
+    </sys_script_include>
+</record_update>

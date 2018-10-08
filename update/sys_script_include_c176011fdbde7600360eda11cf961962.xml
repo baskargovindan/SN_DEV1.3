@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_manen_admanager.ADManagerServerDetails</api_name>
+        <client_callable>true</client_callable>
+        <description>ADManager ServerDetails</description>
+        <name>ADManagerServerDetails</name>
+        <script><![CDATA[/*
+ * ADManagerServerDetails
+ */
+var ADManagerServerDetails = Class.create();
+ADManagerServerDetails.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+	//Remove All Records
+	removeEntries:function()
+	{
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerserverdetails');
+		detailsRecord.deleteMultiple(); //To remove previous entry before set the new server details.
+		return 'success';
+	},
+	// INsert new entries
+	insertEntry:function(protocol_settings, server_name, server_port, is_enabled, enable_service_catalog_item, useMIDServer, mIDServer)
+	{
+		this.removeEntries();
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerserverdetails');
+		detailsRecord.initialize(); 
+		detailsRecord.protocol_settings = protocol_settings;
+		detailsRecord.server_name = server_name;
+		detailsRecord.server_port = server_port;
+		detailsRecord.isenabled = is_enabled;
+		detailsRecord.use_mid_server = useMIDServer;
+		detailsRecord.mid_server = mIDServer;
+		detailsRecord.enable_service_catalog_item = enable_service_catalog_item;
+		detailsRecord.insert();
+
+		this.updateCatalogState(enable_service_catalog_item);
+		this.updateState(is_enabled);
+	},
+	// This will update MID Server  field
+	updateMIDServer:function(state, mid_server)
+	{
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerserverdetails');
+		detailsRecord.query();
+		if(detailsRecord.next())
+		{
+			detailsRecord.use_mid_server = state;
+			detailsRecord.mid_server = mid_server;
+			detailsRecord.update();
+			return 'success';
+		}
+	},
+	// Update ADManager State.
+	updateState:function(state)
+	{
+		if(!state)
+			 state = this.getParameter('state');
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerserverdetails');
+		detailsRecord.query();
+		if(detailsRecord.next())
+		{
+			detailsRecord.isenabled = state;
+			detailsRecord.update();
+		}
+		else
+		{
+			return 'failed';
+		}
+		new ADManagerActionHandler().updateADManagerState(this.getParameter('state'));
+	},
+	updateLoginCredentials:function(username, pwd, domainName)
+	{
+		var sys_id = new ADManagerDomainListHandler().getSysIdforDomain(domainName);
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerserverdetails');
+		detailsRecord.query();
+		detailsRecord.next();
+		detailsRecord.loginname = username;
+		detailsRecord.password = pwd;
+		detailsRecord.domain_name = sys_id;
+		detailsRecord.update();
+		return 'success';
+	},
+	setProductVersion: function(buildNumber)
+	{
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerserverdetails');
+		detailsRecord.query();
+		if(detailsRecord.next())
+		{
+			detailsRecord.build_number = buildNumber;
+			detailsRecord.update();
+		}
+	},
+	//Get server details from DB.
+	getServerDetails:function()
+	{
+		var serverDetails = {};
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerserverdetails');
+		detailsRecord.query();
+		
+		if(detailsRecord.next())
+		{
+			serverDetails.protocol_settings =  detailsRecord.protocol_settings.toString();
+			serverDetails.server_name = detailsRecord.server_name.toString();
+			serverDetails.server_port = detailsRecord.server_port.toString();
+			serverDetails.isenabled = detailsRecord.isenabled.toString();
+			serverDetails.useMIDServer = detailsRecord.use_mid_server.toString();
+			serverDetails.mIDServer = detailsRecord.mid_server.toString();
+			serverDetails.enable_service_catalog_item = detailsRecord.enable_service_catalog_item.toString();
+			serverDetails.login_name = detailsRecord.loginname.toString();
+			serverDetails.password = detailsRecord.password.toString();
+			serverDetails.server_url = detailsRecord.protocol_settings+"://"+detailsRecord.server_name+":"+detailsRecord.server_port;
+			var domainName = new ADManagerDomainListHandler().getdomainNameforSysId(detailsRecord.domain_name.toString()); // domain_name is a Reference field, So this will return the sys_id of the record only. We need to fetch the doman name.
+			serverDetails.domain_name = domainName;
+			serverDetails.isConfigured = 'true';
+		}
+		else
+		{
+			serverDetails.isConfigured = 'false';
+		}
+
+		return new global.JSON().encode(serverDetails);
+	},
+	
+	// Update Catalog items state
+	updateCatalogState:function(state)
+	{
+		if(!state)
+			 state = this.getParameter('state');
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerserverdetails');
+		detailsRecord.query();
+		if(detailsRecord.next())
+		{
+			detailsRecord.enable_service_catalog_item = state;
+			detailsRecord.update();
+		}
+		else
+		{
+			return 'failed';
+		}
+		var authDetails = new ADManagerActionHandler().getAuthDetails();
+		new ADManagerActionHandler().toggleCatalogItemVisibility(authDetails.availableCatalogItems, state);
+	},
+	
+	getURL:function()
+	{
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerserverdetails');
+		var url = null;
+		detailsRecord.query();
+		if(detailsRecord.next())
+			url = detailsRecord.protocol_settings+"://"+detailsRecord.server_name+":"+detailsRecord.server_port;
+		return url;
+	},
+	getSysId: function()
+	{
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerserverdetails');
+		detailsRecord.query();
+		detailsRecord.next();
+		return detailsRecord.sys_id;
+	},
+	isEnabled: function()
+	{
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerserverdetails');
+		detailsRecord.query();
+		if(detailsRecord.next())
+			return detailsRecord.isenabled;
+		else
+			return false;
+	},
+	isCatalogItemEnabled: function()
+	{
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerserverdetails');
+		detailsRecord.query();
+		detailsRecord.next();
+		return detailsRecord.enable_service_catalog_item;
+	},
+	isServerConfigured: function()
+	{
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerserverdetails');
+		detailsRecord.query();
+		if(detailsRecord.next())
+		{
+			if(detailsRecord.server_name != '' && detailsRecord.server_port != '' && detailsRecord.protocol_settings !='')
+				return true;
+			else
+				return false;
+		}
+		return false;
+	},
+	
+	getProductVersion: function()
+	{
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanagerserverdetails');
+		detailsRecord.query();
+		detailsRecord.next();
+		return detailsRecord.build_number;
+	},
+	type: 'ADManagerServerDetails'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-04-28 09:52:15</sys_created_on>
+        <sys_id>c176011fdbde7600360eda11cf961962</sys_id>
+        <sys_mod_count>12</sys_mod_count>
+        <sys_name>ADManagerServerDetails</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_script_include_c176011fdbde7600360eda11cf961962</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-10-06 07:39:30</sys_updated_on>
+    </sys_script_include>
+</record_update>

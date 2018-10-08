@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_rest_message_fn_param_defs">
+    <sys_rest_message_fn_param_defs action="INSERT_OR_UPDATE">
+        <name>PRODUCT_NAME</name>
+        <order>100</order>
+        <rest_message_function display_value="post">5aee8883db688744360eda11cf961953</rest_message_function>
+        <sys_class_name>sys_rest_message_fn_param_defs</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-08-17 07:34:18</sys_created_on>
+        <sys_id>4c4f48c3db688744360eda11cf961954</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>PRODUCT_NAME</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_rest_message_fn_param_defs_4c4f48c3db688744360eda11cf961954</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-08-18 09:44:02</sys_updated_on>
+        <value>ServiceNow</value>
+    </sys_rest_message_fn_param_defs>
+</record_update>

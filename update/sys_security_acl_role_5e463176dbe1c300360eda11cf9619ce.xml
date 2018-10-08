@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl_role">
+    <sys_security_acl_role action="INSERT_OR_UPDATE">
+        <sys_class_name>sys_security_acl_role</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-10-05 13:29:46</sys_created_on>
+        <sys_id>5e463176dbe1c300360eda11cf9619ce</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_manen_admanager_ADManager Managers List.x_manen_admanager.admanager_requester</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_security_acl display_value="x_manen_admanager_ADManager Managers List">7e560ef4dbe98b00360eda11cf961903</sys_security_acl>
+        <sys_update_name>sys_security_acl_role_5e463176dbe1c300360eda11cf9619ce</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-10-05 13:29:46</sys_updated_on>
+        <sys_user_role display_value="x_manen_admanager.admanager_requester" name="x_manen_admanager.admanager_requester">a2481792dbe58300360eda11cf96198e</sys_user_role>
+        <transaction_id/>
+    </sys_security_acl_role>
+</record_update>

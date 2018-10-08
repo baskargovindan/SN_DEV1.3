@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_manen_admanager. ADManagerFileServerHandler</api_name>
+        <client_callable>true</client_callable>
+        <description> ADManagerFileServerHandler</description>
+        <name> ADManagerFileServerHandler</name>
+        <script><![CDATA[var  ADManagerFileServerHandler = Class.create();
+ADManagerFileServerHandler.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+	getFolderList: function()
+	{
+		var resultJSON = {};
+		var searchText = this.getParameter('searchText');
+		var startIndex = this.getParameter('startIndex');
+		var folderPath = this.getParameter('folderPath');
+		var range = this.getParameter('range');
+		var responseJSON = this.doFolderListPost(startIndex, range, searchText, folderPath);
+		responseJSON = new global.JSON().decode(responseJSON);
+		
+		if(responseJSON.status == 'true')
+		{
+			var folderListJSON =  new global.JSON().decode(responseJSON.responseBody);
+			var count = folderListJSON.FOLDER_COUNT;
+			var folderList = folderListJSON.FOLDER_LIST;
+
+			resultJSON.count = count;
+			resultJSON.startIndex = startIndex;
+			var endIndex = parseInt(startIndex)+parseInt(range)-1;
+			resultJSON.endIndex = (endIndex<=count)?endIndex:count;
+			resultJSON.folderList = folderList;
+			resultJSON.status = 'true';
+		} 
+		else
+		{
+			resultJSON.status = 'false';
+			if(responseJSON.statusMessage != null && responseJSON.statusMessage != "")
+				resultJSON.responseBody = responseJSON.statusMessage;
+			else
+			resultJSON.responseBody = responseJSON.responseBody;
+		}
+		return new global.JSON().encode(resultJSON);
+	},
+	 /* Fetch File Servers from ADManager
+	 * Params : startIndex, range, searchText, folderPath
+	 */
+	doFolderListPost: function(startIndex, range, searchText, folderPath)
+	{
+		var requestBody, responseBody, responseCode, sm;
+		var responseJSON = {};
+
+		var authHandler = new ADManagerAuthHandler();
+		var serverHandler = new ADManagerServerDetails();
+
+		var authToken = authHandler.getAuthToken();
+		if(authToken == '')// If Authtoken not present in DB.
+		{
+			responseJSON.responseBody = 'ADManager is not yet authenticated. Please login with valid credentials.';
+			responseJSON.status = 'false';
+			return new global.JSON().encode(responseJSON);
+		}
+		var url = serverHandler.getURL();	
+		
+		try{
+			sm = new sn_ws.RESTMessageV2("ADManagerFSMFolderList", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+			sm.setStringParameter('AuthToken', authToken);  
+			sm.setStringParameter('url', url);
+			sm.setStringParameter('range', range);
+			sm.setStringParameter('start', startIndex);
+			sm.setStringParameterNoEscape('search', searchText);
+			sm.setStringParameterNoEscape('path', folderPath);
+			sm.setHttpTimeout(10000); //In milliseconds. Wait at most 10 seconds for response from http request.
+			response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+		return new global.JSON().encode(responseJSON); // JSON Object --> JSON String;
+	},
+	getFileServerAccountList: function()
+	{
+		var resultJSON = {};
+		var searchText = this.getParameter('searchText');
+		var startIndex = this.getParameter('startIndex');
+		var folderPath = this.getParameter('folderPath');
+		var range = this.getParameter('range');
+		var responseJSON = this.doAccountListPost(startIndex, range, searchText, folderPath);
+		responseJSON = new global.JSON().decode(responseJSON);
+		
+		if(responseJSON.status == 'true')
+		{
+			var folderListJSON =  new global.JSON().decode(responseJSON.responseBody);
+			var count = folderListJSON.count;
+			var folderList = folderListJSON.GroupList;
+
+			resultJSON.count = count;
+			resultJSON.startIndex = startIndex;
+			var endIndex = parseInt(startIndex)+parseInt(range)-1;
+			resultJSON.endIndex = (endIndex<=count)?endIndex:count;
+			resultJSON.folderList = folderList;
+			resultJSON.status = 'true';
+		} 
+		else
+		{
+			resultJSON.status = 'false';
+			resultJSON.responseBody = responseJSON.responseBody;
+		}
+		return new global.JSON().encode(resultJSON);
+	},
+	 /* Fetch File Servers from ADManager
+	 * Params : startIndex, range, searchText, folderPath
+	 */
+	doAccountListPost: function(startIndex, range, searchText, folderPath)
+	{
+		var requestBody, responseBody, responseCode, sm;
+		var responseJSON = {};
+
+		var authHandler = new ADManagerAuthHandler();
+		var serverHandler = new ADManagerServerDetails();
+
+		var authToken = authHandler.getAuthToken();
+		if(authToken == '')// If Authtoken not present in DB.
+		{
+			responseJSON.responseBody = 'ADManager is not yet authenticated. Please login with valid credentials.';
+			responseJSON.status = 'false';
+			return new global.JSON().encode(responseJSON);
+		}
+		var url = serverHandler.getURL();	
+		try{
+			sm = new sn_ws.RESTMessageV2("ADManagerADGroupList", "post");  // Might throw exception if message doesn't exist or not visible due to scope.
+			sm.setStringParameter('AuthToken', authToken);  
+			sm.setStringParameter('url', url);
+			sm.setStringParameter('range', range);
+			sm.setStringParameter('startIndex', startIndex);
+			sm.setStringParameterNoEscape('searchText', searchText);
+			if(folderPath != "")
+			{
+				sm.setStringParameter('folderPath', folderPath);
+			}
+			sm.setHttpTimeout(10000); //In milliseconds. Wait at most 10 seconds for response from http request.
+			response = sm.execute();//Might throw exception if http connection timed out or some issue with sending request itself because of encryption/decryption of password.
+			responseBody = response.haveError() ? response.getErrorMessage() : response.getBody();
+			responseCode = response.getStatusCode();
+		} catch(ex) {
+			responseBody = ex.getMessage();
+			responseCode = '500';
+		} finally {
+			requestBody = sm ? sm.getRequestBody():null;
+		}
+		responseJSON = new ADManagerErrorHandler().handleError(responseCode, responseBody);	
+		return new global.JSON().encode(responseJSON); // JSON Object --> JSON String;
+	},
+	getPermissionList: function()
+	{
+		var resultJSON = {};
+		var basicPermissionList = [];
+		var advPermissionList = [];
+		var selectList = {};
+		var unSelectList = {};
+		
+		var detailsRecord = new GlideRecord('x_manen_admanager_admanageraccessmasks');
+		detailsRecord.orderBy('priority');
+		detailsRecord.query();
+		if(detailsRecord.getRowCount() == 0)
+		{
+			this.initPermisions();
+			detailsRecord = new GlideRecord('x_manen_admanager_admanageraccessmasks');
+			detailsRecord.orderBy('priority');
+			detailsRecord.query();
+		}
+		while(detailsRecord.next())
+		{
+			var permissionDetails = {};
+			
+			permissionDetails.ACCESS_MASK_ID =  detailsRecord.access_mask_id.toString();
+			permissionDetails.ACCESS_MASK_STRING = detailsRecord.access_mask_string.toString();
+			if(detailsRecord.is_advanced_permission)
+			{
+				advPermissionList.push(permissionDetails);
+			}
+			else
+			{
+				basicPermissionList.push(permissionDetails);
+			}
+			
+			var permissionId = detailsRecord.access_mask_id;
+			var mappingRecord = new GlideRecord('x_manen_admanager_admanageraccessmaskmapping');
+			mappingRecord.addQuery('access_mask_id', permissionId);
+			mappingRecord.query();
+			var onSelectArray = [];
+			var onUnSelectArray = [];
+			
+			while(mappingRecord.next())
+			{
+				var mappingType = mappingRecord.mapping_type;
+				var childMask = mappingRecord.child_access_mask.toString();				
+				if(mappingType == 1 || mappingType == 3)
+				{
+					onSelectArray.push(childMask);
+				}
+				if(mappingType == 2 || mappingType == 3)
+				{
+					onUnSelectArray.push(childMask);
+				}
+			}
+			selectList[permissionId] = onSelectArray;
+			unSelectList[permissionId] = onUnSelectArray;	
+		}
+		resultJSON.basicPermissionList = basicPermissionList;
+		resultJSON.advPermissionList = advPermissionList;
+		resultJSON.onSelect = selectList;
+		resultJSON.onUnSelect = unSelectList;
+		return new global.JSON().encode(resultJSON);
+	},
+	initPermisions: function()
+	{
+		var maskMappingString = '[{"access_mask_id":"2032127", "child_access_mask":"32", "mapping_type":"1"}, {"access_mask_id":"2032127", "child_access_mask":"1", "mapping_type":"1"}, {"access_mask_id":"2032127", "child_access_mask":"128", "mapping_type":"1"}, {"access_mask_id":"2032127", "child_access_mask":"8", "mapping_type":"1"}, {"access_mask_id":"2032127", "child_access_mask":"2", "mapping_type":"1"}, {"access_mask_id":"2032127", "child_access_mask":"4", "mapping_type":"1"}, {"access_mask_id":"2032127", "child_access_mask":"256", "mapping_type":"1"}, {"access_mask_id":"2032127", "child_access_mask":"16", "mapping_type":"1"}, {"access_mask_id":"2032127", "child_access_mask":"64", "mapping_type":"3"}, {"access_mask_id":"2032127", "child_access_mask":"65536", "mapping_type":"1"}, {"access_mask_id":"2032127", "child_access_mask":"131072", "mapping_type":"1"}, {"access_mask_id":"2032127", "child_access_mask":"262144", "mapping_type":"3"}, {"access_mask_id":"2032127", "child_access_mask":"524288", "mapping_type":"3"}, {"access_mask_id":"2032127", "child_access_mask":"1245631", "mapping_type":"1"}, {"access_mask_id":"2032127", "child_access_mask":"1179817", "mapping_type":"1"}, {"access_mask_id":"2032127", "child_access_mask":"1179785", "mapping_type":"1"}, {"access_mask_id":"2032127", "child_access_mask":"1048854", "mapping_type":"1"}, {"access_mask_id":"2032127", "child_access_mask":"131241", "mapping_type":"1"}, {"access_mask_id":"1245631", "child_access_mask":"32", "mapping_type":"3"}, {"access_mask_id":"1245631", "child_access_mask":"1", "mapping_type":"3"}, {"access_mask_id":"1245631", "child_access_mask":"128", "mapping_type":"3"}, {"access_mask_id":"1245631", "child_access_mask":"8", "mapping_type":"3"}, {"access_mask_id":"1245631", "child_access_mask":"2", "mapping_type":"3"}, {"access_mask_id":"1245631", "child_access_mask":"4", "mapping_type":"3"}, {"access_mask_id":"1245631", "child_access_mask":"256", "mapping_type":"3"}, {"access_mask_id":"1245631", "child_access_mask":"16", "mapping_type":"3"}, {"access_mask_id":"1245631", "child_access_mask":"65536", "mapping_type":"3"}, {"access_mask_id":"1245631", "child_access_mask":"131072", "mapping_type":"3"}, {"access_mask_id":"1245631", "child_access_mask":"1179817", "mapping_type":"1"}, {"access_mask_id":"1245631", "child_access_mask":"131241", "mapping_type":"1"}, {"access_mask_id":"1245631", "child_access_mask":"1179785", "mapping_type":"1"}, {"access_mask_id":"1245631", "child_access_mask":"1048854", "mapping_type":"1"}, {"access_mask_id":"1245631", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"1179817", "child_access_mask":"32", "mapping_type":"3"}, {"access_mask_id":"1179817", "child_access_mask":"1", "mapping_type":"3"}, {"access_mask_id":"1179817", "child_access_mask":"128", "mapping_type":"3"}, {"access_mask_id":"1179817", "child_access_mask":"8", "mapping_type":"3"}, {"access_mask_id":"1179817", "child_access_mask":"131072", "mapping_type":"3"}, {"access_mask_id":"1179817", "child_access_mask":"131241", "mapping_type":"1"}, {"access_mask_id":"1179817", "child_access_mask":"1179785", "mapping_type":"1"}, {"access_mask_id":"1179817", "child_access_mask":"1245631", "mapping_type":"2"}, {"access_mask_id":"1179817", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"131241", "child_access_mask":"32", "mapping_type":"3"}, {"access_mask_id":"131241", "child_access_mask":"1", "mapping_type":"3"}, {"access_mask_id":"131241", "child_access_mask":"128", "mapping_type":"3"}, {"access_mask_id":"131241", "child_access_mask":"8", "mapping_type":"3"}, {"access_mask_id":"131241", "child_access_mask":"131072", "mapping_type":"3"}, {"access_mask_id":"131241", "child_access_mask":"1179817", "mapping_type":"2"}, {"access_mask_id":"131241", "child_access_mask":"1245631", "mapping_type":"2"}, {"access_mask_id":"131241", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"1179785", "child_access_mask":"1", "mapping_type":"3"}, {"access_mask_id":"1179785", "child_access_mask":"128", "mapping_type":"3"}, {"access_mask_id":"1179785", "child_access_mask":"8", "mapping_type":"3"}, {"access_mask_id":"1179785", "child_access_mask":"131072", "mapping_type":"3"}, {"access_mask_id":"1179785", "child_access_mask":"1179817", "mapping_type":"2"}, {"access_mask_id":"1179785", "child_access_mask":"1245631", "mapping_type":"2"}, {"access_mask_id":"1179785", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"1048854", "child_access_mask":"2", "mapping_type":"3"}, {"access_mask_id":"1048854", "child_access_mask":"4", "mapping_type":"3"}, {"access_mask_id":"1048854", "child_access_mask":"256", "mapping_type":"3"}, {"access_mask_id":"1048854", "child_access_mask":"16", "mapping_type":"3"}, {"access_mask_id":"1048854", "child_access_mask":"1245631", "mapping_type":"2"}, {"access_mask_id":"1048854", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"32", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"1", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"128", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"8", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"2", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"4", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"256", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"16", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"64", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"65536", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"131072", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"262144", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"524288", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"2032127", "child_access_mask":"1245631", "mapping_type":"1"}, {"access_mask_id":"2032127", "child_access_mask":"1179817", "mapping_type":"1"}, {"access_mask_id":"1245631", "child_access_mask":"1179817", "mapping_type":"1"}, {"access_mask_id":"1245631", "child_access_mask":"2032127", "mapping_type":"2"}, {"access_mask_id":"1179817", "child_access_mask":"1245631", "mapping_type":"2"}, {"access_mask_id":"1179817", "child_access_mask":"2032127", "mapping_type":"2"}]';
+		
+		var maskArrayString = '[{"access_mask_id":"2032127", "access_mask_string":"Full Control", "priority":"1", "is_advanced_permission":"false"}, {"access_mask_id":"32", "access_mask_string":"Traverse folder/ execute file", "priority":"10", "is_advanced_permission":"true"}, {"access_mask_id":"1", "access_mask_string":"List folder/ read data", "priority":"11", "is_advanced_permission":"true"}, {"access_mask_id":"128", "access_mask_string":"Read Attributes", "priority":"12", "is_advanced_permission":"true"}, {"access_mask_id":"8", "access_mask_string":"Read Extended Attributes", "priority":"13", "is_advanced_permission":"true"}, {"access_mask_id":"2", "access_mask_string":"Create file/ write data", "priority":"14", "is_advanced_permission":"true"}, {"access_mask_id":"4", "access_mask_string":"Create folders/ append data", "priority":"15", "is_advanced_permission":"true"}, {"access_mask_id":"256", "access_mask_string":"Write Attributes", "priority":"16", "is_advanced_permission":"true"}, {"access_mask_id":"16", "access_mask_string":"Write Extended Attributes", "priority":"17", "is_advanced_permission":"true"}, {"access_mask_id":"64", "access_mask_string":"Delete sub-folders and files", "priority":"18", "is_advanced_permission":"true"}, {"access_mask_id":"65536", "access_mask_string":"Delete", "priority":"19", "is_advanced_permission":"true"}, {"access_mask_id":"131072", "access_mask_string":"Read Permissions", "priority":"20", "is_advanced_permission":"true"}, {"access_mask_id":"262144", "access_mask_string":"Write Permissions", "priority":"21", "is_advanced_permission":"true"}, {"access_mask_id":"524288", "access_mask_string":"Take Ownership", "priority":"22", "is_advanced_permission":"true"}, {"access_mask_id":"1245631", "access_mask_string":"Modify", "priority":"2", "is_advanced_permission":"false"}, {"access_mask_id":"1179817", "access_mask_string":"Read and Execute", "priority":"3", "is_advanced_permission":"false"}, {"access_mask_id":"1179785", "access_mask_string":"Read", "priority":"4", "is_advanced_permission":"false"}, {"access_mask_id":"1048854", "access_mask_string":"Write", "priority":"5", "is_advanced_permission":"false"}, {"access_mask_id":"131241", "access_mask_string":"List folder contents", "priority":"6", "is_advanced_permission":"false"}]';
+		var accessMask = new global.JSON().decode(maskArrayString);
+		var accessMaskMapping = new global.JSON().decode(maskMappingString);
+
+		for(var i=0; i<accessMask.length; i++)
+		{
+			var maskDetails = accessMask[i];
+			var accessMaskRecord = new GlideRecord('x_manen_admanager_admanageraccessmasks');
+			accessMaskRecord.initialize(); 
+			accessMaskRecord.access_mask_id = maskDetails.access_mask_id;
+			accessMaskRecord.access_mask_string = maskDetails.access_mask_string;
+			accessMaskRecord.is_advanced_permission = maskDetails.is_advanced_permission;
+			accessMaskRecord.priority = maskDetails.priority;
+			accessMaskRecord.insert();
+		}
+		for(var j=0; j<accessMaskMapping.length; j++)
+		{
+			var maskDetails = accessMaskMapping[j];
+			var accessMaskRecord = new GlideRecord('x_manen_admanager_admanageraccessmaskmapping');
+			accessMaskRecord.initialize(); 
+			accessMaskRecord.access_mask_id = maskDetails.access_mask_id;
+			accessMaskRecord.child_access_mask = maskDetails.child_access_mask;
+			accessMaskRecord.mapping_type = maskDetails.mapping_type;
+			accessMaskRecord.insert();
+		}
+	},
+    type: ' ADManagerFileServerHandler'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-02-19 18:18:13</sys_created_on>
+        <sys_id>5e365007db5413001de1fabdbf9619a1</sys_id>
+        <sys_mod_count>58</sys_mod_count>
+        <sys_name> ADManagerFileServerHandler</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy>protected</sys_policy>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>sys_script_include_5e365007db5413001de1fabdbf9619a1</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-03-21 09:16:19</sys_updated_on>
+    </sys_script_include>
+</record_update>

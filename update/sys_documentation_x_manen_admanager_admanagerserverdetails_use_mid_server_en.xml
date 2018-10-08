@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_documentation element="use_mid_server" label="Use MID Server" language="en" table="x_manen_admanager_admanagerserverdetails">
+        <sys_documentation action="INSERT_OR_UPDATE">
+            <element>use_mid_server</element>
+            <help/>
+            <hint/>
+            <label>Use MID Server</label>
+            <language>en</language>
+            <name>x_manen_admanager_admanagerserverdetails</name>
+            <plural>Use MID Servers</plural>
+            <sys_class_name>sys_documentation</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2017-04-28 09:35:00</sys_created_on>
+            <sys_id>e78241d7dbde7600360eda11cf9619d3</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>Use MID Server</sys_name>
+            <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+            <sys_update_name>sys_documentation_x_manen_admanager_admanagerserverdetails_use_mid_server_en</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2017-04-28 09:35:00</sys_updated_on>
+            <url/>
+            <url_target/>
+        </sys_documentation>
+    </sys_documentation>
+</record_update>

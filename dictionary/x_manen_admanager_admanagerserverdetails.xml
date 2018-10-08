@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element label="ADManagerServerDetails" max_length="40" name="x_manen_admanager_admanagerserverdetails" type="collection">
+        <element default="ADManager Plus" display="true" label="Application Name" max_length="40" name="application_name" read_only="true" type="string"/>
+        <element label="Build Number" max_length="40" name="build_number" type="string"/>
+        <element attributes="edge_encryption_enabled=true" choice="2" label="Domain Name" max_length="32" name="domain_name" reference="x_manen_admanager_admanagerlogindomaindetails" type="reference">
+            <choice/>
+        </element>
+        <element attributes="edge_encryption_enabled=true" default="true" label="Enable Service Catalog Item" max_length="40" name="enable_service_catalog_item" read_only="true" type="boolean"/>
+        <element attributes="edge_encryption_enabled=true" default="true" label="Active" max_length="40" name="isenabled" read_only="true" type="boolean"/>
+        <element label="LoginName" max_length="255" name="loginname" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="MID Server" max_length="32" name="mid_server" reference="ecc_agent" type="reference"/>
+        <element attributes="no_data_replicate=true,edge_encryption_enabled=true" label="Password" max_length="255" name="password" type="password2"/>
+        <element label="Protocol Settings" max_length="255" name="protocol_settings" read_only="true" type="string"/>
+        <element label="Server Name" mandatory="true" max_length="255" name="server_name" read_only="true" type="string"/>
+        <element label="Server Port" mandatory="true" max_length="40" name="server_port" read_only="true" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Use MID Server" max_length="40" name="use_mid_server" type="boolean"/>
+        <index name="index">
+            <element name="domain_name"/>
+        </index>
+        <index name="index2">
+            <element name="mid_server"/>
+        </index>
+    </element>
+</database>

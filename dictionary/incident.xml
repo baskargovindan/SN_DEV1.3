@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="email_client=true,query_hints=true,hasWorkflow=true,live_feed=true" audit="true" extends="task" label="Incident" max_length="40" name="incident" sizeclass="54" text_index="true" type="collection">
+        <element attributes="no_data_replicate=true,edge_encryption_enabled=true" label="ADManager Request Secure Details" max_length="4000" name="x_manen_admanager_admanager_request_details" read_only="true" type="password2"/>
+        <element label="ADManager Request Details" max_length="4000" name="x_manen_admanager_admanager_request_details_public" read_only="true" type="string"/>
+    </element>
+</database>

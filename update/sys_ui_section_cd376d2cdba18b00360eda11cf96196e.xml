@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_section caption="" section_id="cd376d2cdba18b00360eda11cf96196e" sys_domain="global" table="sys_rest_message_fn" version="3" view="view1">
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>rest_message</element>
+            <position>0</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2017-09-28 12:35:54</sys_created_on>
+            <sys_id>c5376d2cdba18b00360eda11cf96196f</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="sys_rest_message_fn" sys_domain="global" view="ac37e52cdba18b00360eda11cf9619d4">cd376d2cdba18b00360eda11cf96196e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2017-09-28 12:35:54</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>function_name</element>
+            <position>1</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2017-09-28 12:35:54</sys_created_on>
+            <sys_id>49376d2cdba18b00360eda11cf96196f</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="sys_rest_message_fn" sys_domain="global" view="ac37e52cdba18b00360eda11cf9619d4">cd376d2cdba18b00360eda11cf96196e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2017-09-28 12:35:54</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>http_method</element>
+            <position>2</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2017-09-28 12:35:54</sys_created_on>
+            <sys_id>c9376d2cdba18b00360eda11cf96196f</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="sys_rest_message_fn" sys_domain="global" view="ac37e52cdba18b00360eda11cf9619d4">cd376d2cdba18b00360eda11cf96196e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2017-09-28 12:35:54</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.split</element>
+            <position>3</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2017-09-28 12:35:54</sys_created_on>
+            <sys_id>4d376d2cdba18b00360eda11cf96196f</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="sys_rest_message_fn" sys_domain="global" view="ac37e52cdba18b00360eda11cf9619d4">cd376d2cdba18b00360eda11cf96196e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2017-09-28 12:35:54</sys_updated_on>
+            <sys_user/>
+            <type>.split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>sys_scope</element>
+            <position>4</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2017-09-28 12:35:54</sys_created_on>
+            <sys_id>cd376d2cdba18b00360eda11cf96196f</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="sys_rest_message_fn" sys_domain="global" view="ac37e52cdba18b00360eda11cf9619d4">cd376d2cdba18b00360eda11cf96196e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2017-09-28 12:35:54</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.end_split</element>
+            <position>5</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2017-09-28 12:35:54</sys_created_on>
+            <sys_id>41376d2cdba18b00360eda11cf961970</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="sys_rest_message_fn" sys_domain="global" view="ac37e52cdba18b00360eda11cf9619d4">cd376d2cdba18b00360eda11cf96196e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2017-09-28 12:35:54</sys_updated_on>
+            <sys_user/>
+            <type>.end_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>rest_endpoint</element>
+            <position>6</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2017-09-28 12:35:54</sys_created_on>
+            <sys_id>c1376d2cdba18b00360eda11cf961970</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="sys_rest_message_fn" sys_domain="global" view="ac37e52cdba18b00360eda11cf9619d4">cd376d2cdba18b00360eda11cf96196e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2017-09-28 12:35:54</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>REL.sys_rest_message_fn.REL:67bdac52374010008687ddb1967334ee</element>
+            <position>7</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2017-09-28 12:35:54</sys_created_on>
+            <sys_id>45376d2cdba18b00360eda11cf961970</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="sys_rest_message_fn" sys_domain="global" view="ac37e52cdba18b00360eda11cf9619d4">cd376d2cdba18b00360eda11cf96196e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2017-09-28 12:35:54</sys_updated_on>
+            <sys_user/>
+            <type>list</type>
+        </sys_ui_element>
+        <sys_ui_section action="INSERT_OR_UPDATE">
+            <caption/>
+            <header>false</header>
+            <name>sys_rest_message_fn</name>
+            <roles/>
+            <sys_class_name>sys_ui_section</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2017-09-28 12:35:53</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>cd376d2cdba18b00360eda11cf96196e</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>sys_rest_message_fn</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+            <sys_update_name>sys_ui_section_cd376d2cdba18b00360eda11cf96196e</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2017-09-28 12:35:53</sys_updated_on>
+            <sys_user/>
+            <title>false</title>
+            <view display_value="view1" name="view1">ac37e52cdba18b00360eda11cf9619d4</view>
+            <view_name/>
+        </sys_ui_section>
+    </sys_ui_section>
+</record_update>

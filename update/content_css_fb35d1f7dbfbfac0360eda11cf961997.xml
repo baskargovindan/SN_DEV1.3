@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="content_css">
+    <content_css action="INSERT_OR_UPDATE">
+        <name>ADManagerStyles</name>
+        <style>.server_details_submit{ &#13;
+display: none;&#13;
+}&#13;
+.server_details:hover .server_details_submit{&#13;
+cursor:pointer;&#13;
+display : block;&#13;
+}&#13;
+.login_submit{ &#13;
+display: none;&#13;
+}&#13;
+.login_section:hover .login_submit{&#13;
+cursor:pointer;&#13;
+display : block;&#13;
+}</style>
+        <sys_class_name>content_css</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2017-07-13 13:48:05</sys_created_on>
+        <sys_id>fb35d1f7dbfbfac0360eda11cf961997</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>ADManagerStyles</sys_name>
+        <sys_package display_value="ADManager Plus" source="x_manen_admanager">f61bfc1fdb9e7600360eda11cf961902</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ADManager Plus">f61bfc1fdb9e7600360eda11cf961902</sys_scope>
+        <sys_update_name>content_css_fb35d1f7dbfbfac0360eda11cf961997</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2017-07-13 13:48:05</sys_updated_on>
+        <type>local</type>
+        <url/>
+    </content_css>
+</record_update>
